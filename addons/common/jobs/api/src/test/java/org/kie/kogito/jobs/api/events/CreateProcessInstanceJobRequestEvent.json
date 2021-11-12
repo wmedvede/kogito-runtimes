@@ -1,0 +1,21 @@
+{
+    "specversion" : "1.0",
+    "id" : "1234",
+    "source" : "http://localhost:8080/TestProcess",
+    "type" : "CreateProcessInstanceJobRequest",
+    "time" : "2021-10-29T15:11:18.980674+02:00",
+    "kogitoprocinstanceid" : "BLABLA",
+    "data" : {
+        "id" : "jobId",
+        "expirationTime" : "2021-10-29T15:11:18.484156+02:00",
+        "priority" : 5,
+        "callbackEndpoint" : "callbackendpoint_XX",
+        "processInstanceId" : "processInstance_XX",
+        "rootProcessInstanceId" : "rootProcessInstanceId_XX",
+        "processId" : "processId_XX",
+        "rootProcessId" : "rootProcessId_XX",
+        "nodeInstanceId" : "nodeInstanceId_XX",
+        "repeatInterval" : 6,
+        "repeatLimit" : 7
+    }
+}

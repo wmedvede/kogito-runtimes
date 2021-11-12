@@ -56,5 +56,8 @@ public interface JobsService {
      * @param id unique id of the job
      * @return returns actual expiration time for the job
      */
+    //TODO why do we need this method?
+    //Probably only for the StartTimerEvent for starting processes only
+    //Right now it looks like it's not being used.
     ZonedDateTime getScheduledTime(String id);
 }
