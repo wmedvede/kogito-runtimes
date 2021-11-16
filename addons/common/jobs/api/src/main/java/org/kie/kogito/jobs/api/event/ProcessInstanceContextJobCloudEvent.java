@@ -102,4 +102,15 @@ public abstract class ProcessInstanceContextJobCloudEvent<T> extends JobCloudEve
     public String getKogitoAddons() {
         return kogitoAddons;
     }
+
+    @Override
+    public String toString() {
+        return "ProcessInstanceContextJobCloudEvent{" +
+                "processInstanceId='" + processInstanceId + '\'' +
+                ", processId='" + processId + '\'' +
+                ", rootProcessInstanceId='" + rootProcessInstanceId + '\'' +
+                ", rootProcessId='" + rootProcessId + '\'' +
+                ", kogitoAddons='" + kogitoAddons + '\'' +
+                "} " + super.toString();
+    }
 }

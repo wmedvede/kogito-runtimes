@@ -105,4 +105,19 @@ public abstract class JobCloudEvent<T> {
     public String getSubject() {
         return subject;
     }
+
+    @Override
+    public String toString() {
+        return "JobCloudEvent{" +
+                "specVersion='" + specVersion + '\'' +
+                ", id='" + id + '\'' +
+                ", source=" + source +
+                ", type='" + type + '\'' +
+                ", time=" + time +
+                ", subject='" + subject + '\'' +
+                ", dataContentType='" + dataContentType + '\'' +
+                ", dataSchema='" + dataSchema + '\'' +
+                ", data=" + data +
+                '}';
+    }
 }

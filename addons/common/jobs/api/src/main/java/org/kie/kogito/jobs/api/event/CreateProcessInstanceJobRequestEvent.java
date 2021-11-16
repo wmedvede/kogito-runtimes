@@ -35,4 +35,9 @@ public class CreateProcessInstanceJobRequestEvent extends ProcessInstanceContext
             String kogitoAddons) {
         super(CREATE_PROCESS_INSTANCE_JOB_REQUEST, source, data, processInstanceId, processId, rootProcessInstanceId, rootProcessId, kogitoAddons);
     }
+
+    @Override
+    public String toString() {
+        return "CreateProcessInstanceJobRequestEvent{} " + super.toString();
+    }
 }

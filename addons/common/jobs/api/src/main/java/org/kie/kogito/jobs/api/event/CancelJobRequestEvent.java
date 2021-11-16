@@ -22,25 +22,34 @@ public class CancelJobRequestEvent extends ProcessInstanceContextJobCloudEvent<C
     public static final String CANCEL_JOB_REQUEST = "CancelJobRequest";
 
     public CancelJobRequestEvent(URI source,
-            JobId data,
+            String id,
             String processInstanceId,
             String processId,
             String rootProcessInstanceId,
             String rootProcessId,
             String kogitoAddons) {
-        super(CANCEL_JOB_REQUEST, source, data, processInstanceId, processId, rootProcessInstanceId, rootProcessId, kogitoAddons);
+        super(CANCEL_JOB_REQUEST, source, new JobId(id), processInstanceId, processId, rootProcessInstanceId, rootProcessId, kogitoAddons);
     }
 
     public static class JobId {
 
         private String id;
 
-        private JobId(String id) {
+        public JobId() {
+            // marshalling constructor.
+        }
+
+        public JobId(String id) {
             this.id = id;
         }
 
         public String getId() {
             return id;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "CancelJobRequestEvent{} " + super.toString();
     }
 }
