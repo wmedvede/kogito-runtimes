@@ -16,7 +16,9 @@
 package org.kie.kogito.codegen.openapi.client.di;
 
 import java.io.File;
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.kie.kogito.codegen.api.context.KogitoBuildContext;
@@ -38,6 +40,7 @@ public class ServicesConfigurationHandler extends AbstractDependencyInjectionHan
 
     @Override
     public ClassOrInterfaceDeclaration handle(ClassOrInterfaceDeclaration node, OpenApiSpecDescriptor descriptor, File originalGeneratedFile) {
+        System.out.println("ServicesConfigurationHandler handle Aca esa la madre del cordero. ");
         if (fetchServiceClasses(descriptor).anyMatch(new ClassFileEqualityFilter(originalGeneratedFile))) {
             node.getConstructorByParameterTypes(API_CLIENT_PARAMETER)
                     .ifPresent(c -> {
@@ -51,8 +54,12 @@ public class ServicesConfigurationHandler extends AbstractDependencyInjectionHan
     }
 
     private Stream<String> fetchServiceClasses(final OpenApiSpecDescriptor descriptor) {
-        return descriptor.getRequiredOperations().stream()
-                .map(OpenApiClientOperation::getGeneratedClass);
+
+        List<String> fetchServiceClasses = descriptor.getRequiredOperations().stream()
+                .map(OpenApiClientOperation::getGeneratedClass)
+                .collect(Collectors.toList());
+        System.out.println("fetchServiceClasses va a dar: " + fetchServiceClasses);
+        return fetchServiceClasses.stream();
     }
 
     private static class ClassFileEqualityFilter implements Predicate<String> {
@@ -66,13 +73,20 @@ public class ServicesConfigurationHandler extends AbstractDependencyInjectionHan
 
         @Override
         public boolean test(String canonicalClassName) {
+            System.out.println("ClassFileEqualityFilter.test con file: " + file.toURI() + " y canonicalClassName: " + canonicalClassName);
             if (file == null) {
+                System.out.println("test.1");
                 return false;
             }
             if (canonicalClassName == null || canonicalClassName.isEmpty()) {
+                System.out.println("test.2");
                 return false;
             }
-            return file.getPath().endsWith(canonicalClassName.replace(".", "/") + JAVA_EXTENSION);
+            System.out.println("file.getPath() = " + file.getPath());
+            System.out.println("valor para comparar: " + canonicalClassName.replace(".", "/") + JAVA_EXTENSION);
+            boolean test = file.getPath().endsWith(canonicalClassName.replace(".", "/") + JAVA_EXTENSION);
+            System.out.println("resultado test =  " + test);
+            return test;
         }
     }
 }
