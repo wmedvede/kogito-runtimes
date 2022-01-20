@@ -67,6 +67,7 @@ public class OpenApiClientGeneratorWrapper {
         GlobalSettings.setProperty(ONCE_LOGGER, TRUE);
 
         this.configurator = new CodegenConfigurator();
+        System.out.println("OpenApiClientGeneratorWrapper.setInputSpec: " + specFilePath);
         this.configurator.setInputSpec(specFilePath);
         this.configurator.setGeneratorName(GENERATOR_NAME);
         this.configurator.setValidateSpec(false);
@@ -83,6 +84,7 @@ public class OpenApiClientGeneratorWrapper {
      * @return a new instance of {@link OpenApiClientGeneratorWrapper}
      */
     public static OpenApiClientGeneratorWrapper newInstance(final String specFilePath, final String outputDir, final KogitoBuildContext context) {
+        System.out.println("OpenApiClientGeneratorWrapper newInstance, specFilePath: " + specFilePath + ", outputDir: " + outputDir);
         return new OpenApiClientGeneratorWrapper(specFilePath, outputDir, context.name());
     }
 
