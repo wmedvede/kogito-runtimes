@@ -51,7 +51,7 @@ public class GeneratedFileBuilder {
     }
 
     private GeneratedFile toGeneratedFile(final String path, final String content) {
-        System.out.println("toGeneratedFile: path: " + path + " content: " + content);
+        System.out.println("toGeneratedFile: path: " + path + " content: " + "content comentado");
         return new GeneratedFile(GeneratedFileType.SOURCE, path, content);
     }
 
