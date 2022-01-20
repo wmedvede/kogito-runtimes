@@ -83,10 +83,14 @@ public class ServicesConfigurationHandler extends AbstractDependencyInjectionHan
                 return false;
             }
             System.out.println("file.getPath() = " + file.getPath());
+            System.out.println("file.toURI().toString() = " + file.toURI());
             System.out.println("valor para comparar: " + canonicalClassName.replace(".", "/") + JAVA_EXTENSION);
-            boolean test = file.getPath().endsWith(canonicalClassName.replace(".", "/") + JAVA_EXTENSION);
-            System.out.println("resultado test =  " + test);
-            return test;
+            boolean test1 = file.getPath().endsWith(canonicalClassName.replace(".", "/") + JAVA_EXTENSION);
+            boolean test2 = file.toURI().toString().endsWith(canonicalClassName.replace(".", "/") + JAVA_EXTENSION);
+            System.out.println("resultado test1 =  " + test1);
+            System.out.println("resultado test2 =  " + test2);
+
+            return test2;
         }
     }
 }
