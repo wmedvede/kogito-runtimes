@@ -120,6 +120,8 @@ public class OpenApiClientCodegen extends AbstractGenerator {
                                 .generate(descriptor)
                                 .stream()
                                 .filter(f -> f.toPath().toString().toLowerCase().endsWith(".java"))
+                                //TODO En principio acá itera los archivos generados y les mete la pare de CDI
+                                //hasta este momento el generado de OpenApi no genera las anotaciones CDI
                                 .map(f -> this.fileBuilder.build(f, descriptor))
                                 .collect(toList());
                 generatedFiles.addAll(files);

@@ -40,7 +40,11 @@ public class ServicesConfigurationHandler extends AbstractDependencyInjectionHan
     public ClassOrInterfaceDeclaration handle(ClassOrInterfaceDeclaration node, OpenApiSpecDescriptor descriptor, File originalGeneratedFile) {
         if (fetchServiceClasses(descriptor).anyMatch(new ClassFileEqualityFilter(originalGeneratedFile))) {
             node.getConstructorByParameterTypes(API_CLIENT_PARAMETER)
-                    .ifPresent(c -> this.context.getDependencyInjectionAnnotator().withInjection(c));
+                    .ifPresent(c -> {
+                        //TODO
+                        System.out.println("ServicesConfigurationHandler,  Anotando el constructor con Inject en el file " + originalGeneratedFile.getPath() + " -> " + c);
+                        this.context.getDependencyInjectionAnnotator().withInjection(c);
+                    });
             return this.context.getDependencyInjectionAnnotator().withApplicationComponent(node);
         }
         return node;

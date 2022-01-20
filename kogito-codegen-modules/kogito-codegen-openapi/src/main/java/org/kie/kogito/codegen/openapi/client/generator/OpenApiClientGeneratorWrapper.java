@@ -99,6 +99,10 @@ public class OpenApiClientGeneratorWrapper {
                         .toClientOptInput()
                         .config(this.kogitoCodegen))
                 .generate();
+        System.out.println("Estos los los archivos originales generados por el OpenAPi");
+        generatedFiles.forEach(file -> System.out.println(file.toURI()));
+        System.out.println("FIN archivos originales el OpenAPi");
+
         this.kogitoCodegen.processGeneratedOperations(descriptor);
         return generatedFiles;
     }
