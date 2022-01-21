@@ -46,7 +46,7 @@ class PathResolverTest {
 
     @ParameterizedTest
     @MethodSource("org.kie.kogito.codegen.api.utils.KogitoContextTestUtils#contextBuilders")
-    void verifyFileResolver(final KogitoBuildContext.Builder contextBuilder) {
+    void verifyFileResolver(final KogitoBuildContext.Builder contextBuilder) throws Exception {
         final String resource = "specs/__files/petstore.json";
         final KogitoBuildContext context = contextBuilder.build();
         final String classpathPath = requireNonNull(getClass().getClassLoader().getResource(resource)).getPath();
