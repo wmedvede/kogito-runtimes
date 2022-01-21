@@ -42,8 +42,6 @@ public final class PathResolverFactory {
      */
     public static PathResolver newResolver(final OpenApiSpecDescriptor resource, final KogitoBuildContext context) {
         Objects.requireNonNull(resource);
-        System.out
-                .println("PathResolverFactory.newResolver, resource: " + resource.getURI().toString() + " isAbsolute: " + resource.getURI().isAbsolute() + " scheme: " + resource.getURI().getScheme());
         if (!resource.getURI().isAbsolute()) {
             return new ClasspathResolver(context);
         }

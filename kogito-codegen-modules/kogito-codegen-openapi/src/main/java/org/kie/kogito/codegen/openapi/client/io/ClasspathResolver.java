@@ -16,6 +16,7 @@
 package org.kie.kogito.codegen.openapi.client.io;
 
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Paths;
 
 import org.kie.kogito.codegen.api.context.KogitoBuildContext;
@@ -40,32 +41,19 @@ public class ClasspathResolver extends AbstractPathResolver {
     public String resolve(OpenApiSpecDescriptor descriptor) {
         OpenApiUtils.requireValidSpecURI(descriptor);
         String resourceUri = descriptor.getURI().getPath();
-        System.out.println("ClasspathResolver.resolve, descriptor.getURI: " + descriptor.getURI().toString() + ", resourceUri: " + resourceUri);
         if (PathResolverFactory.CLASSPATH.equals(descriptor.getURI().getScheme())) {
             resourceUri = descriptor.getURI().getHost() + resourceUri;
         }
-        String classpathPath = requireNonNull(this.context.getClassLoader().getResource(resourceUri), "Resource URI can't be found. Descriptor: " + descriptor).getPath();
-        System.out.println("ClasspathResolver.classpathPath inicial: " + classpathPath);
-
+        final URL resource = requireNonNull(this.context.getClassLoader().getResource(resourceUri), "Resource URI can't be found. Descriptor: " + descriptor);
         // OpenApi generator tool doesn't have access to the application build classpath, so we save to a temp location (/target) where it can be accessed
-        if (classpathPath.contains(CLASSPATH_SEP)) {
-            System.out.println("ClasspathResolver tenemos el class separator");
-            classpathPath = this.saveFileToTempLocation(descriptor, this.context.getClassLoader().getResourceAsStream(resourceUri));
-            System.out.println("ClasspathResolver nos vamos con: " + classpathPath);
-
+        if (resource.getPath().contains(CLASSPATH_SEP)) {
+            return this.saveFileToTempLocation(descriptor, this.context.getClassLoader().getResourceAsStream(resourceUri));
         } else {
             try {
-                System.out.println("ClasspathResolver NO tenemos el class separator, tenemos q convertir el path en seco");
-                classpathPath = Paths.get(requireNonNull(this.context.getClassLoader().getResource(resourceUri), "Resource URI can't be found. Descriptor: " + descriptor).toURI()).toString();
+                return Paths.get(resource.toURI()).toString();
             } catch (URISyntaxException e) {
-                System.out.println("ClasspathResolver resolviendo Path en el class path ha petado" + e.getMessage());
-                e.printStackTrace();
                 throw new IllegalArgumentException("Classpath resource was resolved to an invalid URI for the Descriptor: " + descriptor, e);
             }
-
-            System.out.println("ClasspathResolver.classpathPath final: " + classpathPath);
         }
-
-        return classpathPath;
     }
 }

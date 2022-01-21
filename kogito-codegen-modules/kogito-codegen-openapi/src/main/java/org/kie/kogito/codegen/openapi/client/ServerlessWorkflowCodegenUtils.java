@@ -50,8 +50,6 @@ public final class ServerlessWorkflowCodegenUtils {
         if (ServerlessWorkflowUtils.isOpenApiOperation(function)) {
             final String resource = ServerlessWorkflowUtils.getOpenApiURI(function);
             final String operationId = ServerlessWorkflowUtils.getOpenApiOperationId(function);
-            System.out.println("ServerlessWorkflowCodegenUtils.fromSWFunctionDefinition, resource: " + resource + ", operationId: " + operationId);
-
             return new OpenApiSpecDescriptor(resource, operationId);
         }
         throw new IllegalArgumentException("Resource does not contain operation id");

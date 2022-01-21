@@ -111,11 +111,8 @@ public class OpenApiClientCodegen extends AbstractGenerator {
             final String openApiGeneratorOutputDir = this.getOutputDirForOpenAPIGen(descriptor);
             try {
                 // save the descriptor file in a temporary location
-                System.out.println("OpenApiClientCodegen.internalGenerate: resource a resolver: " + descriptor.getURI().toString());
                 final String resolvedPath =
                         PathResolverFactory.newResolver(descriptor, this.context()).resolve(descriptor);
-                System.out.println("OpenApiClientCodegen.resolvedPath: " + resolvedPath);
-
                 // generate the openapi client files
                 final List<GeneratedFile> files =
                         OpenApiClientGeneratorWrapper.newInstance(resolvedPath, openApiGeneratorOutputDir, this.context())
@@ -123,8 +120,6 @@ public class OpenApiClientCodegen extends AbstractGenerator {
                                 .generate(descriptor)
                                 .stream()
                                 .filter(f -> f.toPath().toString().toLowerCase().endsWith(".java"))
-                                //TODO En principio acá itera los archivos generados y les mete la pare de CDI
-                                //hasta este momento el generado de OpenApi no genera las anotaciones CDI
                                 .map(f -> this.fileBuilder.build(f, descriptor))
                                 .collect(toList());
                 generatedFiles.addAll(files);

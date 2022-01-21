@@ -49,13 +49,9 @@ public class DependencyInjectionConfigurer {
      */
     public CompilationUnit parseAndConfigure(final File originalGeneratedFile, final OpenApiSpecDescriptor descriptor) {
         try {
-            System.out.println("DependencyInjectionConfigurer.parseAndConfigure: originalGeneratedFile: " + originalGeneratedFile.toURI());
             final CompilationUnit compilationUnit = StaticJavaParser.parse(originalGeneratedFile);
             final Optional<ClassOrInterfaceDeclaration> clazz = compilationUnit.findFirst(ClassOrInterfaceDeclaration.class);
-            System.out.println("Antes del class is present: " + originalGeneratedFile.getName());
             if (clazz.isPresent()) {
-                System.out.println("SI, the class is present!!!!");
-
                 this.servicesConfigurationHandler.handle(clazz.get(), descriptor, originalGeneratedFile);
                 this.applicationPropertiesHandler.handle(clazz.get(), descriptor, originalGeneratedFile);
             }

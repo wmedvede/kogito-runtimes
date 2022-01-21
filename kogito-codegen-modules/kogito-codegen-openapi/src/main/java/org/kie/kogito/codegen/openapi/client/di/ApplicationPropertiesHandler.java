@@ -45,10 +45,7 @@ public class ApplicationPropertiesHandler extends AbstractDependencyInjectionHan
 
     @Override
     public ClassOrInterfaceDeclaration handle(ClassOrInterfaceDeclaration node, OpenApiSpecDescriptor descriptor, File originalGeneratedFile) {
-        //TODO
-        System.out.println("ApplicationPropertiesHandler, chequeado si necesita ser procesado, node: " + node.getNameAsString() + " originalGeneratedFile: " + originalGeneratedFile.toURI());
         if (node.getNameAsString().equals(CONFIGURABLE_CLASS)) {
-            System.out.println("ApplicationPropertiesHandler, necesita!");
             final String openApiId = this.formatSpecId(descriptor);
             this.attributesAndKeys.forEach((key, value) -> node.getFields().stream().filter(
                     f -> f.getVariables().size() == 1 &&

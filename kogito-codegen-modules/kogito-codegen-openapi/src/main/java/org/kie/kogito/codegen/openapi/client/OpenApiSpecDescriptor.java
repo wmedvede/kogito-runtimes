@@ -43,7 +43,6 @@ public class OpenApiSpecDescriptor {
     public OpenApiSpecDescriptor(final String resource) {
         try {
             this.uri = new URI(resource);
-            System.out.println("OpenApiSpecDescriptor creando descriptor con resource: " + resource + ", uri: " + uri.toString());
             this.resourceName = Paths.get(this.uri.getPath()).getFileName().toString();
             this.id = generateId(this.uri.toString(), resourceName);
             this.requiredOperations = new HashSet<>();

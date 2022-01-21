@@ -42,8 +42,6 @@ public class GeneratedFileBuilder {
 
     public GeneratedFile build(File file, OpenApiSpecDescriptor descriptor) {
         if (this.context.hasDI()) {
-            // TODO importante acá agrega las anotaciones CDI acodigo generado por la OpenApi
-            System.out.println("GeneratedFileBuilder, aplicar dependencyInjectionConfigurer al archivo: " + file.toURI());
             return this.toGeneratedFile(getGeneratedFilePath(file),
                     this.dependencyInjectionConfigurer.parseAndConfigure(file, descriptor).toString());
         }
@@ -51,7 +49,6 @@ public class GeneratedFileBuilder {
     }
 
     private GeneratedFile toGeneratedFile(final String path, final String content) {
-        System.out.println("toGeneratedFile: path: " + path + " content: " + "content comentado");
         return new GeneratedFile(GeneratedFileType.SOURCE, path, content);
     }
 
@@ -67,16 +64,13 @@ public class GeneratedFileBuilder {
      */
     private String getGeneratedFilePath(final File openAPIGeneratorFile) {
         final Path path = openAPIGeneratorFile.toPath();
-        String result = "";
         for (int i = 0; i < path.getNameCount(); i++) {
             if ("src".equals(path.getName(i).toString())) {
-                result = path.subpath(i, path.getNameCount()).toString()
+                return path.subpath(i, path.getNameCount()).toString()
                         .replace(Paths.get("src", "main", "java").toString().concat(File.separator), "");
-                break;
             }
         }
-        System.out.println("getGeneratedFilePath for: " + openAPIGeneratorFile.toURI() + " is: " + result);
-        return result;
+        return "";
     }
 
     private String readFileContent(final File file) {
