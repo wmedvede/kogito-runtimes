@@ -18,8 +18,6 @@ package org.kie.kogito.serialization.process.protobuf;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,8 +58,8 @@ public class ProtostreamProtobufAdapterTypeProvider implements ProtobufTypeProvi
         }
     }
 
-    private Collection<Path> protostreamDescriptors() {
-        return Arrays.asList(Paths.get("META-INF","kogito-types.proto"), Paths.get("META-INF","application-types.proto"));
+    private Collection<String> protostreamDescriptors() {
+        return Arrays.asList("META-INF/kogito-types.proto", "META-INF/application-types.proto");
     }
 
     private boolean isKogitoPackage(FileDescriptor fd){
@@ -82,6 +80,7 @@ public class ProtostreamProtobufAdapterTypeProvider implements ProtobufTypeProvi
         // make sure kogito-types is processed first or else will be missing as dependency for the application types
         List<FileDescriptor> descriptorsSorted = sortFds(context.getFileDescriptors().values());
         for (FileDescriptor entry : descriptorsSorted) {
+            System.out.println("ProtostreamProtobufAdapterTypeProvider entry: " + entry);
             dependencies = protos.toArray(new com.google.protobuf.Descriptors.FileDescriptor[protos.size()]);
             protos.add(Descriptors.FileDescriptor.buildFrom(buildEnumTypes(entry), dependencies));
             dependencies = protos.toArray(new com.google.protobuf.Descriptors.FileDescriptor[protos.size()]);
@@ -92,23 +91,37 @@ public class ProtostreamProtobufAdapterTypeProvider implements ProtobufTypeProvi
 
     private SerializationContextImpl buildSerializationContext() throws IOException {
         SerializationContextImpl context = new SerializationContextImpl(Configuration.builder().build());
-        for (Path protoFile : protostreamDescriptors()) {
-            try (InputStream is = getInputStream(protoFile)) {
+        for (String protoResource : protostreamDescriptors()) {
+            System.out.println("ProtostreamProtobufAdapterTypeProvider.buildSerializationContext.protoFile: " + protoResource);
+            try (InputStream is = getInputStream(protoResource)) {
                 if (is == null) {
+                    System.out.println("ProtostreamProtobufAdapterTypeProvider.buildSerializationContext.protoFile IS NULL: " + protoResource);
+
                     continue;
                 }
-                FileDescriptorSource source = new FileDescriptorSource().addProtoFile(protoFile.getFileName().toString(), is);
+                System.out.println("ProtostreamProtobufAdapterTypeProvider.addProtoFile: " + getFileName(protoResource));
+                FileDescriptorSource source = new FileDescriptorSource().addProtoFile(getFileName(protoResource), is);
                 context.registerProtoFiles(source);
             }
         }
         return context;
     }
 
-    private InputStream getInputStream(Path protoFile) {
-        InputStream is = ProtostreamProtobufAdapterTypeProvider.class.getClassLoader().getResourceAsStream(protoFile.toString());
-        if(is == null && Thread.currentThread().getContextClassLoader() != null) {
-            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(protoFile.toString());
+    private String getFileName(String protoResource) {
+        int index = protoResource.lastIndexOf('/');
+        if (index >= 0) {
+            return protoResource.substring(index + 1);
         }
+        return protoResource;
+    }
+
+    private InputStream getInputStream(String protoResource) {
+        InputStream is = ProtostreamProtobufAdapterTypeProvider.class.getClassLoader().getResourceAsStream(protoResource);
+        if(is == null && Thread.currentThread().getContextClassLoader() != null) {
+            System.out.println("ProtostreamProtobufAdapterTypeProvider.primer intento es nulo");
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(protoResource);
+        }
+        System.out.println("ProtostreamProtobufAdapterTypeProvider. al final ha dado, is: " + is);
         return is;
     }
 

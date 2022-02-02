@@ -55,15 +55,20 @@ public class ProcessInstanceMarshallerService {
 
         public <T> Builder withContextEntries(Map<MarshallerContextName<T>, T> contextEntries) {
             for (Map.Entry<MarshallerContextName<T>, T> item : contextEntries.entrySet()) {
+                System.out.println("ProcessInstanceMarshallerService agregando context entry: " + (MarshallerContextName<Object>) item.getKey() + ", item: " + item.getValue());
+
                 ProcessInstanceMarshallerService.this.contextEntries.put((MarshallerContextName<Object>) item.getKey(), (Object) item.getValue());
             }
             return this;
         }
 
         public Builder withDefaultObjectMarshallerStrategies() {
+            System.out.println("ProcessInstanceMarshallerService.withDefaultObjectMarshallerStrategies");
             ServiceLoader<ObjectMarshallerStrategy> loader = ServiceLoader.load(ObjectMarshallerStrategy.class);
+            System.out.println("ProcessInstanceMarshallerService.withDefaultObjectMarshallerStrategies loader: " + loader);
 
             for (ObjectMarshallerStrategy strategy : loader) {
+                System.out.println("ProcessInstanceMarshallerService.withDefaultObjectMarshallerStrategies adding strategy: " + strategy);
                 ProcessInstanceMarshallerService.this.strats.add(strategy);
             }
             return this;
