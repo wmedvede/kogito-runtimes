@@ -25,6 +25,8 @@ import org.kie.kogito.process.ProcessInstance;
 import org.kie.kogito.process.Signal;
 import org.kie.kogito.services.uow.UnitOfWorkExecutor;
 import org.kie.kogito.uow.UnitOfWorkManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TriggerJobCommand {
 
@@ -33,6 +35,8 @@ public class TriggerJobCommand {
     private Integer limit;
     private Process<?> process;
     private UnitOfWorkManager uom;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TriggerJobCommand.class);
 
     public TriggerJobCommand(String processInstanceId, String timerId, Integer limit, Process<?> process, UnitOfWorkManager uom) {
         this.processInstanceId = processInstanceId;
@@ -43,11 +47,14 @@ public class TriggerJobCommand {
     }
 
     public Boolean execute() {
+        LOGGER.debug("Executing TriggerJobCommand for, processInstanceId: {}, timerId: {}, limit. {}", processInstanceId, timerId, limit);
         return UnitOfWorkExecutor.executeInUnitOfWork(uom, () -> {
             Optional<? extends ProcessInstance<?>> processInstanceFound = process.instances().findById(processInstanceId);
             return processInstanceFound.map(processInstance -> {
                 JobId jobId = JobIdResolver.resolve(timerId);
+                LOGGER.debug("sending signal to processInstanceId: {}, jobId.signal: {}, jobId.payload: {}", processInstance, jobId.signal(), jobId.payload(limit));
                 processInstance.send(new JobSignal(jobId.signal(), jobId.payload(limit)));
+                LOGGER.debug("signal was sent successfully!");
                 return true;
             }).orElse(false);
         });

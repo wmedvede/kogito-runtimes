@@ -77,12 +77,15 @@ public class InMemoryJobService implements JobsService, AutoCloseable {
 
     @Override
     public String scheduleProcessInstanceJob(ProcessInstanceJobDescription description) {
+
         ScheduledFuture<?> future;
         if (description.expirationTime().repeatInterval() != null) {
+            LOGGER.debug("ScheduleProcessInstanceJob with repeatInterval: {}", description);
             future = scheduler.scheduleAtFixedRate(
                     getSignalProcessInstanceCommand(description, false, description.expirationTime().repeatLimit()),
                     calculateDelay(description), description.expirationTime().repeatInterval(), TimeUnit.MILLISECONDS);
         } else {
+            LOGGER.debug("ScheduleProcessInstanceJob without repeatInterval: {}", description);
             future = scheduler.schedule(getSignalProcessInstanceCommand(description, true, 1), calculateDelay(description),
                     TimeUnit.MILLISECONDS);
         }
@@ -155,16 +158,20 @@ public class InMemoryJobService implements JobsService, AutoCloseable {
         @Override
         public void run() {
             try {
-                LOGGER.info("Job {} started", id);
+                LOGGER.info("Job {} started, about to execute the TriggerJobCommand, removeAtExecution: {}", id, removeAtExecution);
                 Process<? extends Model> process = processes.processById(processId);
+                LOGGER.info("the process was found: {}", process != null);
                 limit--;
                 Boolean executed = new TriggerJobCommand(processInstanceId, id, limit, process, unitOfWorkManager).execute();
+                LOGGER.debug("Job was executed?: {}, limit: {}", executed, limit);
                 if (limit == 0 || !executed) {
+                    LOGGER.debug("We can now cancel the Job: {}", id);
                     cancelJob(id, false);
                 }
                 LOGGER.debug("Job {} completed", id);
             } finally {
                 if (removeAtExecution) {
+                    LOGGER.debug("removeAtExecution: {}, so we need to cancel job after the signal triggering!", removeAtExecution);
                     cancelJob(id, true);
                 }
             }
