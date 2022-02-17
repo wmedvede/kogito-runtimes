@@ -20,14 +20,15 @@ import org.jbpm.ruleflow.core.factory.CompositeContextNodeFactory;
 import org.jbpm.ruleflow.core.factory.JoinFactory;
 import org.jbpm.ruleflow.core.factory.NodeFactory;
 import org.jbpm.ruleflow.core.factory.SplitFactory;
+import org.jbpm.ruleflow.core.factory.TimerNodeFactory;
 import org.kie.kogito.serverless.workflow.parser.ParserContext;
-import org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser;
 
 import io.serverlessworkflow.api.Workflow;
 import io.serverlessworkflow.api.states.CallbackState;
 
 import static org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser.eventBasedExclusiveSplitNode;
 import static org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser.joinExclusiveNode;
+import static org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser.timerNode;
 
 public class CallbackHandler extends CompositeContextNodeHandler<CallbackState> {
 
@@ -61,11 +62,10 @@ public class CallbackHandler extends CompositeContextNodeHandler<CallbackState> 
             // Connect the event fired branch last node with the join node.
             connect(eventFiredBranchLastNode, joinNode);
             // Create the timer fired branch
-            org.jbpm.ruleflow.core.factory.TimerNodeFactory<?> eventTimeoutTimerNode = ServerlessWorkflowParser.timerNode(embeddedSubProcess, parserContext.newId(), eventTimeout);
+            TimerNodeFactory<?> eventTimeoutTimerNode = timerNode(embeddedSubProcess, parserContext.newId(), eventTimeout);
             connect(splitNode, eventTimeoutTimerNode);
             // Connect the timer fired branch last node with the join node
-            connect(eventTimeoutTimerNode, joinNode);
-            currentNode = joinNode;
+            currentNode = connect(eventTimeoutTimerNode, joinNode);
         } else {
             // No timeouts, standard case.
             currentNode = connect(currentNode,

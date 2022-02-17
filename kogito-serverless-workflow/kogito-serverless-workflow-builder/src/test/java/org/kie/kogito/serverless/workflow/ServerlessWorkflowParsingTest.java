@@ -47,6 +47,7 @@ import io.serverlessworkflow.api.start.Start;
 import io.serverlessworkflow.api.states.DefaultState.Type;
 import io.serverlessworkflow.api.states.SleepState;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -720,6 +721,30 @@ public class ServerlessWorkflowParsingTest {
         assertEquals(ServerlessWorkflowParser.DEFAULT_NAME, process.getName());
         assertEquals(ServerlessWorkflowParser.DEFAULT_VERSION, process.getVersion());
         assertEquals(ServerlessWorkflowParser.DEFAULT_PACKAGE, process.getPackageName());
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends Node> T assertClassAndGetNode(RuleFlowProcess process, int nodeIndex, Class<T> expectedNodeClass) {
+        Node node = process.getNodes()[nodeIndex];
+        assertThat(process.getNodes())
+                .withFailMessage("Required nodeIndex: {} is out of range, the process.nodes has size: {}", nodeIndex, process.getNodes().length)
+                .hasSizeGreaterThan(nodeIndex);
+        assertThat(node).isInstanceOf(expectedNodeClass);
+        return (T) node;
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "/exec/callback-state.sw.json" })
+    void testProduceCallbackState(String workflowLocation) throws Exception {
+        RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
+        assertThat(process.getId()).isEqualTo("callback-state");
+        assertThat(process.getVersion()).isEqualTo("1.0");
+        assertThat(process.getPackageName()).isEqualTo("org.kie.kogito.serverless");
+        assertThat(process.getVisibility()).isEqualTo(RuleFlowProcess.PUBLIC_VISIBILITY);
+
+        assertThat(process.getNodes()).hasSize(7);
+
+        StartNode startNode = assertClassAndGetNode(process, 0, StartNode.class);
     }
 
     private Process getWorkflowParser(String workflowLocation) throws IOException {
