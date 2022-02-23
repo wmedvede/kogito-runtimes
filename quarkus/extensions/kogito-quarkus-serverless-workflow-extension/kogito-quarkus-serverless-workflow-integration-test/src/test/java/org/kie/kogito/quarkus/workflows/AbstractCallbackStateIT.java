@@ -18,7 +18,6 @@ package org.kie.kogito.quarkus.workflows;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -77,7 +76,6 @@ abstract class AbstractCallbackStateIT {
         assertProcessInstanceExists(callbackProcessGetByIdUrl, processInstanceId);
 
         // prepare and send the response to the created process via kafka
-        System.out.println(ZonedDateTime.now() + "MANDO EL EVENTO XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx");
         String response = objectMapper.writeValueAsString(CloudEventBuilder.v1()
                 .withId(UUID.randomUUID().toString())
                 .withSource(URI.create(""))
@@ -89,7 +87,6 @@ abstract class AbstractCallbackStateIT {
                 .build());
         kafkaClient.produce(response, callbackEventTopic);
 
-        System.out.println(ZonedDateTime.now() + "ARRANCO A ESPERAR XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx");
         // give some time for the event to be processed and the process to finish.
         assertProcessInstanceHasFinished(callbackProcessGetByIdUrl, processInstanceId, 1, 120);
     }

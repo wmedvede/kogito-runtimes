@@ -151,16 +151,16 @@
           </execution>
         </executions>
       </plugin>
-<!--      <plugin>-->
-<!--      <artifactId>maven-clean-plugin</artifactId>-->
-<!--      <configuration>-->
-<!--        <filesets>-->
-<!--          <fileset>-->
-<!--            <directory>${project.basedir}/src/main/resources/shared</directory>-->
-<!--          </fileset>-->
-<!--        </filesets>-->
-<!--      </configuration>-->
-<!--    </plugin>-->
+      <plugin>
+      <artifactId>maven-clean-plugin</artifactId>
+      <configuration>
+        <filesets>
+          <fileset>
+            <directory>${project.basedir}/src/main/resources/shared</directory>
+          </fileset>
+        </filesets>
+      </configuration>
+    </plugin>
     </plugins>
   </build>
 
