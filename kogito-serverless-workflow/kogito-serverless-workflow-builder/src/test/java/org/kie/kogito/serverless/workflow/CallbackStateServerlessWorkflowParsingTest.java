@@ -16,10 +16,7 @@
 
 package org.kie.kogito.serverless.workflow;
 
-import java.util.List;
-
 import org.jbpm.ruleflow.core.RuleFlowProcess;
-import org.jbpm.workflow.core.NodeContainer;
 import org.jbpm.workflow.core.node.ActionNode;
 import org.jbpm.workflow.core.node.BoundaryEventNode;
 import org.jbpm.workflow.core.node.CompositeContextNode;
@@ -32,16 +29,18 @@ import org.jbpm.workflow.core.node.TimerNode;
 import org.jbpm.workflow.core.node.WorkItemNode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.kie.api.definition.process.Connection;
-import org.kie.api.definition.process.Node;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.kie.kogito.serverless.workflow.WorkflowTestUtils.assertClassAndGetNode;
+import static org.kie.kogito.serverless.workflow.WorkflowTestUtils.assertHasName;
+import static org.kie.kogito.serverless.workflow.WorkflowTestUtils.assertHasNodesSize;
+import static org.kie.kogito.serverless.workflow.WorkflowTestUtils.assertIsConnected;
+import static org.kie.kogito.serverless.workflow.WorkflowTestUtils.assertProcessMainParams;
 
 class CallbackStateServerlessWorkflowParsingTest extends AbstractServerlessWorkflowParsingTest {
 
     @ParameterizedTest
-    @ValueSource(strings = { "/exec/callback-state.sw.json" })
+    @ValueSource(strings = { "/exec/callback-state.sw.json", "/exec/callback-state.sw.yml" })
     void produceCallbackState(String workflowLocation) throws Exception {
         RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
         // assert the process main parameters
@@ -77,7 +76,7 @@ class CallbackStateServerlessWorkflowParsingTest extends AbstractServerlessWorkf
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "/exec/callback-state-timeouts.sw.json" })
+    @ValueSource(strings = { "/exec/callback-state-timeouts.sw.json", "/exec/callback-state-timeouts.sw.yml" })
     void produceCallbackStateWithTimeouts(String workflowLocation) throws Exception {
         RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
         // assert the process main parameters
@@ -142,62 +141,5 @@ class CallbackStateServerlessWorkflowParsingTest extends AbstractServerlessWorkf
         assertIsConnected(callbackState, processFinalizeSuccessfulState);
         assertIsConnected(processFinalizeSuccessfulState, processEndNode1);
         assertIsConnected(processFinalizeWithErrorState, processEndNode2);
-    }
-
-    public static void assertProcessMainParams(RuleFlowProcess process, String id, String name, String version, String pkg, String visibility) {
-        assertThat(process.getId()).isEqualTo(id);
-        assertThat(process.getName()).isEqualTo(name);
-        assertThat(process.getVersion()).isEqualTo(version);
-        assertThat(process.getPackageName()).isEqualTo(pkg);
-        assertThat(process.getVisibility()).isEqualTo(visibility);
-    }
-
-    public static void assertHasName(Node node, String expectedName) {
-        assertThat(node.getName())
-                .withFailMessage("Node: (%s, %s) is expected to have name: %s", node.getId(), node.getName(), expectedName)
-                .isEqualTo(expectedName);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T extends Node> T assertClassAndGetNode(NodeContainer nodeContainer, int nodeIndex, Class<T> expectedNodeClass) {
-        Node node = nodeContainer.getNodes()[nodeIndex];
-        assertThat(nodeContainer.getNodes())
-                .withFailMessage("Required nodeIndex: %s is out of range, the nodeContainer.nodes has size: %s.", nodeIndex, nodeContainer.getNodes().length)
-                .hasSizeGreaterThan(nodeIndex);
-        assertThat(node)
-                .withFailMessage("Node at nodeIndex: %s must be of class: %s, but is: %s.",
-                        nodeIndex, expectedNodeClass.getName(), node.getClass().getName())
-                .isInstanceOf(expectedNodeClass);
-        return (T) node;
-    }
-
-    public static void assertIsConnected(Node startNode, Node endNode) {
-        assertThat(startNode.getOutgoingConnections())
-                .withFailMessage("Node: (%s, %s), has no outgoing connections.",
-                        startNode.getId(), startNode.getName())
-                .hasSizeGreaterThan(0);
-        for (List<Connection> connections : startNode.getOutgoingConnections().values()) {
-            for (Connection connection : connections) {
-                if (connection.getTo() == endNode) {
-                    return;
-                }
-            }
-        }
-        fail("Node: (%s, %s), is not connected with Node: (%s, %s).",
-                startNode.getId(), startNode.getName(), endNode.getId(), endNode.getName());
-    }
-
-    public static void assertHasNodesSize(CompositeContextNode compositeContextNode, int expectedSize) {
-        assertThat(compositeContextNode.getNodes())
-                .withFailMessage("Node: (%s, %s), is expected to have %s nodes, but has %s.",
-                        compositeContextNode.getId(), compositeContextNode.getName(), expectedSize, compositeContextNode.getNodes().length)
-                .hasSize(expectedSize);
-    }
-
-    public static void assertHasNodesSize(RuleFlowProcess process, int expectedSize) {
-        assertThat(process.getNodes())
-                .withFailMessage("Process: (%s, %s), is expected to have %s nodes, but has %s.",
-                        process.getId(), process.getName(), expectedSize, process.getNodes().length)
-                .hasSize(expectedSize);
     }
 }
