@@ -44,7 +44,6 @@ import io.serverlessworkflow.api.start.Start;
 import io.serverlessworkflow.api.states.DefaultState.Type;
 import io.serverlessworkflow.api.states.SleepState;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;

@@ -29,6 +29,7 @@ import io.serverlessworkflow.api.states.CallbackState;
 import static org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser.eventBasedExclusiveSplitNode;
 import static org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser.joinExclusiveNode;
 import static org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser.timerNode;
+import static org.kie.kogito.serverless.workflow.utils.TimeoutsConfigResolver.resolveEventTimeout;
 
 public class CallbackHandler extends CompositeContextNodeHandler<CallbackState> {
 
@@ -48,7 +49,7 @@ public class CallbackHandler extends CompositeContextNodeHandler<CallbackState> 
         if (state.getAction() != null) {
             currentNode = connect(currentNode, getActionNode(embeddedSubProcess, state.getAction()));
         }
-        String eventTimeout = getEventTimeout();
+        String eventTimeout = resolveEventTimeout(state, workflow);
         if (eventTimeout != null && !eventTimeout.isEmpty()) {
             // Create the event based exclusive split node.
             SplitFactory<?> splitNode = eventBasedExclusiveSplitNode(embeddedSubProcess, parserContext.newId());

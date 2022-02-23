@@ -19,10 +19,17 @@ package org.kie.kogito.serverless.workflow;
 import java.util.List;
 
 import org.jbpm.ruleflow.core.RuleFlowProcess;
+import org.jbpm.workflow.core.NodeContainer;
+import org.jbpm.workflow.core.node.ActionNode;
 import org.jbpm.workflow.core.node.BoundaryEventNode;
 import org.jbpm.workflow.core.node.CompositeContextNode;
 import org.jbpm.workflow.core.node.EndNode;
+import org.jbpm.workflow.core.node.EventNode;
+import org.jbpm.workflow.core.node.Join;
+import org.jbpm.workflow.core.node.Split;
 import org.jbpm.workflow.core.node.StartNode;
+import org.jbpm.workflow.core.node.TimerNode;
+import org.jbpm.workflow.core.node.WorkItemNode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.api.definition.process.Connection;
@@ -35,46 +42,139 @@ class CallbackStateServerlessWorkflowParsingTest extends AbstractServerlessWorkf
 
     @ParameterizedTest
     @ValueSource(strings = { "/exec/callback-state.sw.json" })
-    void testProduceCallbackState(String workflowLocation) throws Exception {
+    void produceCallbackState(String workflowLocation) throws Exception {
         RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
-        assertThat(process.getId()).isEqualTo("callback-state");
-        assertThat(process.getVersion()).isEqualTo("1.0");
-        assertThat(process.getPackageName()).isEqualTo("org.kie.kogito.serverless");
-        assertThat(process.getVisibility()).isEqualTo(RuleFlowProcess.PUBLIC_VISIBILITY);
+        // assert the process main parameters
+        assertProcessMainParams(process,
+                "callback_state",
+                "Callback State",
+                "1.0",
+                "org.kie.kogito.serverless",
+                RuleFlowProcess.PUBLIC_VISIBILITY);
 
-        assertThat(process.getNodes()).hasSize(7);
+        // assert the main process structure
+        assertCallbackProcessMainStructure(process);
 
-        StartNode startNode = assertClassAndGetNode(process, 0, StartNode.class);
-        EndNode endNode1 = assertClassAndGetNode(process, 1, EndNode.class);
-        EndNode endNode2 = assertClassAndGetNode(process, 2, EndNode.class);
+        // assert the CallbackState internal structure for the no timeouts case
         CompositeContextNode callbackState = assertClassAndGetNode(process, 3, CompositeContextNode.class);
-        assertThat(callbackState.getName()).isEqualTo("CallbackState");
-        CompositeContextNode finalizeSuccessfulState = assertClassAndGetNode(process, 4, CompositeContextNode.class);
-        assertThat(finalizeSuccessfulState.getName()).isEqualTo("FinalizeSuccessful");
-        CompositeContextNode finalizeWithErrorState = assertClassAndGetNode(process, 5, CompositeContextNode.class);
-        assertThat(finalizeWithErrorState.getName()).isEqualTo("FinalizeWithError");
+        assertHasNodesSize(callbackState, 6);
+        StartNode stateStartNode = assertClassAndGetNode(callbackState, 0, StartNode.class);
+        assertHasName(stateStartNode, "EmbeddedStart");
+        WorkItemNode stateActionNode = assertClassAndGetNode(callbackState, 1, WorkItemNode.class);
+        assertHasName(stateActionNode, "callbackFunction");
+        ActionNode afterStateActionMergeNode = assertClassAndGetNode(callbackState, 2, ActionNode.class);
+        EventNode stateEventNode = assertClassAndGetNode(callbackState, 3, EventNode.class);
+        assertHasName(stateEventNode, "callbackEvent");
+        ActionNode afterStateEventMergeNode = assertClassAndGetNode(callbackState, 4, ActionNode.class);
+        EndNode stateEndNode = assertClassAndGetNode(callbackState, 5, EndNode.class);
+        assertHasName(stateEndNode, "EmbeddedEnd");
+
+        assertIsConnected(stateStartNode, stateActionNode);
+        assertIsConnected(stateActionNode, afterStateActionMergeNode);
+        assertIsConnected(afterStateActionMergeNode, stateEventNode);
+        assertIsConnected(stateEventNode, afterStateEventMergeNode);
+        assertIsConnected(afterStateEventMergeNode, stateEndNode);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "/exec/callback-state-timeouts.sw.json" })
+    void produceCallbackStateWithTimeouts(String workflowLocation) throws Exception {
+        RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
+        // assert the process main parameters
+        assertProcessMainParams(process,
+                "callback_state_timeouts",
+                "Callback State Timeouts",
+                "1.0",
+                "org.kie.kogito.serverless",
+                RuleFlowProcess.PUBLIC_VISIBILITY);
+
+        // assert the main process structure
+        assertCallbackProcessMainStructure(process);
+
+        // assert the CallbackState internal structure for the timeouts case
+        CompositeContextNode callbackState = assertClassAndGetNode(process, 3, CompositeContextNode.class);
+        assertHasNodesSize(callbackState, 9);
+        StartNode stateStartNode = assertClassAndGetNode(callbackState, 0, StartNode.class);
+        assertHasName(stateStartNode, "EmbeddedStart");
+        WorkItemNode stateActionNode = assertClassAndGetNode(callbackState, 1, WorkItemNode.class);
+        assertHasName(stateActionNode, "callbackFunction");
+        ActionNode afterStateActionMergeNode = assertClassAndGetNode(callbackState, 2, ActionNode.class);
+        Split stateSplitNode = assertClassAndGetNode(callbackState, 3, Split.class);
+        assertHasName(stateSplitNode, "ExclusiveSplit_" + stateSplitNode.getId());
+        Join stateJoinNode = assertClassAndGetNode(callbackState, 4, Join.class);
+        assertHasName(stateJoinNode, "ExclusiveJoin_" + stateJoinNode.getId());
+        EventNode stateEventNode = assertClassAndGetNode(callbackState, 5, EventNode.class);
+        assertHasName(stateEventNode, "callbackEvent");
+        ActionNode afterStateEventMergeNode = assertClassAndGetNode(callbackState, 6, ActionNode.class);
+        TimerNode stateTimerNode = assertClassAndGetNode(callbackState, 7, TimerNode.class);
+        assertHasName(stateTimerNode, "TimerNode_" + stateTimerNode.getId());
+        assertThat(stateTimerNode.getTimer().getDelay()).isEqualTo("PT1M");
+        assertThat(stateTimerNode.getTimer().getTimeType()).isEqualTo(1);
+        EndNode stateEndNode = assertClassAndGetNode(callbackState, 8, EndNode.class);
+        assertHasName(stateEndNode, "EmbeddedEnd");
+
+        assertIsConnected(stateStartNode, stateActionNode);
+        assertIsConnected(stateActionNode, afterStateActionMergeNode);
+        assertIsConnected(afterStateActionMergeNode, stateSplitNode);
+        assertIsConnected(stateSplitNode, stateEventNode);
+        assertIsConnected(stateEventNode, afterStateEventMergeNode);
+        assertIsConnected(afterStateEventMergeNode, stateJoinNode);
+        assertIsConnected(stateSplitNode, stateTimerNode);
+        assertIsConnected(stateTimerNode, stateJoinNode);
+        assertIsConnected(stateJoinNode, stateEndNode);
+    }
+
+    private void assertCallbackProcessMainStructure(RuleFlowProcess process) {
+        assertHasNodesSize(process, 7);
+        StartNode processStartNode = assertClassAndGetNode(process, 0, StartNode.class);
+        EndNode processEndNode1 = assertClassAndGetNode(process, 1, EndNode.class);
+        EndNode processEndNode2 = assertClassAndGetNode(process, 2, EndNode.class);
+        CompositeContextNode callbackState = assertClassAndGetNode(process, 3, CompositeContextNode.class);
+        assertHasName(callbackState, "CallbackState");
+        ActionNode processFinalizeSuccessfulState = assertClassAndGetNode(process, 4, ActionNode.class);
+        assertHasName(processFinalizeSuccessfulState, "FinalizeSuccessful");
+        ActionNode processFinalizeWithErrorState = assertClassAndGetNode(process, 5, ActionNode.class);
+        assertHasName(processFinalizeWithErrorState, "FinalizeWithError");
         BoundaryEventNode callbackStateErrorBoundaryEvent = assertClassAndGetNode(process, 6, BoundaryEventNode.class);
-        assertThat(callbackStateErrorBoundaryEvent.getName()).isEqualTo("Error-CallbackState-java.lang.Exception");
+        assertHasName(callbackStateErrorBoundaryEvent, "Error-CallbackState-java.lang.Exception");
 
-        assertIsConnectedWith(startNode, callbackState);
+        assertIsConnected(processStartNode, callbackState);
+        assertIsConnected(callbackState, processFinalizeSuccessfulState);
+        assertIsConnected(processFinalizeSuccessfulState, processEndNode1);
+        assertIsConnected(processFinalizeWithErrorState, processEndNode2);
+    }
 
+    public static void assertProcessMainParams(RuleFlowProcess process, String id, String name, String version, String pkg, String visibility) {
+        assertThat(process.getId()).isEqualTo(id);
+        assertThat(process.getName()).isEqualTo(name);
+        assertThat(process.getVersion()).isEqualTo(version);
+        assertThat(process.getPackageName()).isEqualTo(pkg);
+        assertThat(process.getVisibility()).isEqualTo(visibility);
+    }
+
+    public static void assertHasName(Node node, String expectedName) {
+        assertThat(node.getName())
+                .withFailMessage("Node: (%s, %s) is expected to have name: %s", node.getId(), node.getName(), expectedName)
+                .isEqualTo(expectedName);
     }
 
     @SuppressWarnings("unchecked")
-    <T extends Node> T assertClassAndGetNode(RuleFlowProcess process, int nodeIndex, Class<T> expectedNodeClass) {
-        Node node = process.getNodes()[nodeIndex];
-        assertThat(process.getNodes())
-                .withFailMessage("Required nodeIndex: {} is out of range, the process.nodes has size: {}", nodeIndex, process.getNodes().length)
+    public static <T extends Node> T assertClassAndGetNode(NodeContainer nodeContainer, int nodeIndex, Class<T> expectedNodeClass) {
+        Node node = nodeContainer.getNodes()[nodeIndex];
+        assertThat(nodeContainer.getNodes())
+                .withFailMessage("Required nodeIndex: %s is out of range, the nodeContainer.nodes has size: %s.", nodeIndex, nodeContainer.getNodes().length)
                 .hasSizeGreaterThan(nodeIndex);
-        assertThat(node).isInstanceOf(expectedNodeClass);
+        assertThat(node)
+                .withFailMessage("Node at nodeIndex: %s must be of class: %s, but is: %s.",
+                        nodeIndex, expectedNodeClass.getName(), node.getClass().getName())
+                .isInstanceOf(expectedNodeClass);
         return (T) node;
     }
 
-    void assertIsConnectedWith(Node startNode, Node endNode) {
+    public static void assertIsConnected(Node startNode, Node endNode) {
         assertThat(startNode.getOutgoingConnections())
-                .withFailMessage("Node ({}, {}),  has no outgoing connections.",
-                        startNode.getOutgoingConnections()
-                                .values())
+                .withFailMessage("Node: (%s, %s), has no outgoing connections.",
+                        startNode.getId(), startNode.getName())
                 .hasSizeGreaterThan(0);
         for (List<Connection> connections : startNode.getOutgoingConnections().values()) {
             for (Connection connection : connections) {
@@ -83,7 +183,21 @@ class CallbackStateServerlessWorkflowParsingTest extends AbstractServerlessWorkf
                 }
             }
         }
-        fail("Node ({}, {}), is not connected with Node ({}, {}).",
+        fail("Node: (%s, %s), is not connected with Node: (%s, %s).",
                 startNode.getId(), startNode.getName(), endNode.getId(), endNode.getName());
+    }
+
+    public static void assertHasNodesSize(CompositeContextNode compositeContextNode, int expectedSize) {
+        assertThat(compositeContextNode.getNodes())
+                .withFailMessage("Node: (%s, %s), is expected to have %s nodes, but has %s.",
+                        compositeContextNode.getId(), compositeContextNode.getName(), expectedSize, compositeContextNode.getNodes().length)
+                .hasSize(expectedSize);
+    }
+
+    public static void assertHasNodesSize(RuleFlowProcess process, int expectedSize) {
+        assertThat(process.getNodes())
+                .withFailMessage("Process: (%s, %s), is expected to have %s nodes, but has %s.",
+                        process.getId(), process.getName(), expectedSize, process.getNodes().length)
+                .hasSize(expectedSize);
     }
 }

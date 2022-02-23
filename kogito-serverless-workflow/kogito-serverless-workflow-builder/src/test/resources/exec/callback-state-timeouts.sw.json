@@ -1,15 +1,15 @@
 {
-  "id": "callback_state",
+  "id": "callback_state_timeouts",
   "version": "1.0",
-  "name": "Callback State",
+  "name": "Callback State Timeouts",
   "expressionLang": "jsonpath",
-  "description": "Callback State Test",
+  "description": "Callback State Timeouts Test",
   "start": "CallbackState",
   "events": [
     {
       "name": "callbackEvent",
       "source": "",
-      "type": "callback_state_event_type"
+      "type": "callback_state_timeouts_event_type"
     }
   ],
   "errors": [
@@ -45,7 +45,10 @@
           "errorRef": "callbackError",
           "transition": "FinalizeWithError"
         }
-      ]
+      ],
+      "timeouts": {
+        "eventTimeout": "PT1M"
+      }
     },
     {
       "name": "FinalizeSuccessful",
