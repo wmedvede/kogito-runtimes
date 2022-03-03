@@ -1,7 +1,6 @@
 {
   "id": "switch_state_event_condition_timeouts_transition",
   "name": "Switch State Event Condition Timeouts Transition Test",
-  "expressionLang": "jsonpath",
   "version": "1.0",
   "start": "ChooseOnEvent",
   "events": [
@@ -39,7 +38,7 @@
         "transition": "HandleNoVisaDecision"
       },
       "timeouts": {
-        "eventTimeout": "PT2M"
+        "eventTimeout": "PT30S"
       }
     },
     {
@@ -50,7 +49,7 @@
           "name": "sendApprovedVisaResult",
           "eventRef": {
             "triggerEventRef": "sendProcessResultEvent",
-            "data": "{constantValue: \\\"hello\\\",  processInstanceId: \\\"$WORKFLOW.instanceId\\\"}"
+            "data": "{decision: \\\"Approved\\\"}"
           }
         }
       ],
@@ -58,18 +57,30 @@
     },
     {
       "name": "DeniedVisa",
-      "type": "inject",
-      "data": {
-        "decision": "Denied"
-      },
+      "type": "operation",
+      "actions": [
+        {
+          "name": "sendDeniedVisaResult",
+          "eventRef": {
+            "triggerEventRef": "sendProcessResultEvent",
+            "data": "{decision: \\\"Denied\\\"}"
+          }
+        }
+      ],
       "end": true
     },
     {
       "name": "HandleNoVisaDecision",
-      "type": "inject",
-      "data": {
-        "decision": "NoDecision"
-      },
+      "type": "operation",
+      "actions": [
+        {
+          "name": "sendNoDecisionResult",
+          "eventRef": {
+            "triggerEventRef": "sendProcessResultEvent",
+            "data": "{decision: \\\"NoDecision\\\"}"
+          }
+        }
+      ],
       "end": true
     }
   ]

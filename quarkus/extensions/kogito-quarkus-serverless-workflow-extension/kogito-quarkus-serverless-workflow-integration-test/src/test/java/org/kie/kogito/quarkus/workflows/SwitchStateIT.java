@@ -19,20 +19,28 @@ package org.kie.kogito.quarkus.workflows;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.kogito.test.quarkus.kafka.KafkaTestClient;
 import org.kie.kogito.testcontainers.quarkus.KafkaQuarkusTestResource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.cloudevents.core.builder.CloudEventBuilder;
 import io.cloudevents.jackson.JsonCloudEventData;
+import io.cloudevents.jackson.JsonFormat;
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 import io.restassured.path.json.JsonPath;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.kie.kogito.quarkus.workflows.WorkflowTestUtils.assertProcessInstanceHasFinished;
 import static org.kie.kogito.quarkus.workflows.WorkflowTestUtils.newProcessInstance;
 import static org.kie.kogito.quarkus.workflows.WorkflowTestUtils.newProcessInstanceAndGetId;
 
@@ -40,10 +48,30 @@ import static org.kie.kogito.quarkus.workflows.WorkflowTestUtils.newProcessInsta
 class SwitchStateIT {
 
     private static final String SWITCH_STATE_SERVICE_URL = "/switch_state";
+
+    private static final String SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL = "/switch_state_event_condition_timeouts_transition";
+    private static final String SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL = SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL + "/{id}";
+
+    private static final String VISA_APPROVED_EVENT_TOPIC = "visa_approved_topic";
+    private static final String VISA_APPROVED_EVENT_TYPE = "visa_approved_in";
+    private static final String VISA_DENIED_EVENT_TOPIC = "visa_denied_topic";
+    private static final String VISA_DENIED_EVENT_TYPE = "visa_denied_in";
+
     private static final String DECISION_PATH = "workflowdata.decision";
     private static final String DECISION_APPROVED = "Approved";
     private static final String DECISION_DENIED = "Denied";
     private static final String DECISION_INVALIDATED = "Invalidated";
+    private static final String DECISION_NO_DECISION = "NoDecision";
+
+    private static final String EVENT_DECISION_PATH = "data.decision";
+    private static final String EVENT_PROCESS_INSTANCE_ID_PATH = "kogitoprocinstanceid";
+    private static final String EVENT_TYPE_PATH = "type";
+
+    private static final String PROCESS_RESULT_EVENT_TYPE = "process_result_event";
+
+    private static final String KOGITO_OUTGOING_STREAM_TOPIC = "kogito-sw-out-events";
+
+    private static final String EMPTY_WORKFLOW_DATA = "{\"workflowdata\" : \"\"}";
 
     @ConfigProperty(name = KafkaQuarkusTestResource.KOGITO_KAFKA_PROPERTY)
     String kafkaBootstrapServers;
@@ -52,6 +80,97 @@ class SwitchStateIT {
 
     KafkaTestClient kafkaClient;
 
+    @BeforeEach
+    void setup() {
+        kafkaClient = new KafkaTestClient(kafkaBootstrapServers);
+        objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .registerModule(JsonFormat.getCloudEventJacksonModule())
+                .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
+    @AfterEach
+    void cleanUp() {
+        kafkaClient.shutdown();
+    }
+
+    @Test
+    void switchStateEventConditionTimeoutsTransitionApproved() throws Exception {
+        switchStateEventConditionTimeoutsTransitionWithEvent(VISA_APPROVED_EVENT_TYPE, VISA_APPROVED_EVENT_TOPIC, DECISION_APPROVED);
+    }
+
+    @Test
+    void switchStateEventConditionTimeoutsTransitionDenied() throws Exception {
+        switchStateEventConditionTimeoutsTransitionWithEvent(VISA_DENIED_EVENT_TYPE, VISA_DENIED_EVENT_TOPIC, DECISION_DENIED);
+    }
+
+    @Test
+    void switchStateEventConditionTimeoutsTransitionTimeoutsExceeded() throws Exception {
+        // Start a new process instance.
+        String processInstanceId = newProcessInstanceAndGetId(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL, EMPTY_WORKFLOW_DATA);
+        // Give enough time for the timeout to exceed.
+        assertProcessInstanceHasFinished(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL, processInstanceId, 1, 180);
+        // When the process has finished the default case event must arrive.
+        JsonPath result = waitForEvent(KOGITO_OUTGOING_STREAM_TOPIC, 50);
+        assertDecisionEvent(result, processInstanceId, PROCESS_RESULT_EVENT_TYPE, DECISION_NO_DECISION);
+    }
+
+    private void switchStateEventConditionTimeoutsTransitionWithEvent(String eventTypeToSend,
+            String eventTopicToSend,
+            String expectedDecision) throws Exception {
+        // Start a new process instance.
+        String processInstanceId = newProcessInstanceAndGetId(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL, EMPTY_WORKFLOW_DATA);
+
+        // Send the event to activate the approval path.
+        String response = objectMapper.writeValueAsString(CloudEventBuilder.v1()
+                .withId(UUID.randomUUID().toString())
+                .withSource(URI.create(""))
+                .withType(eventTypeToSend)
+                .withTime(OffsetDateTime.now())
+                .withExtension("kogitoprocrefid", processInstanceId)
+                .withData(JsonCloudEventData.wrap(objectMapper.createObjectNode()))
+                .build());
+        kafkaClient.produce(response, eventTopicToSend);
+
+        // Give some time for the event to be processed and the process to finish.
+        assertProcessInstanceHasFinished(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL, processInstanceId, 1, 180);
+
+        // Give some time to consume the event and very the expected decision was made.
+        JsonPath result = waitForEvent(KOGITO_OUTGOING_STREAM_TOPIC, 50);
+        assertDecisionEvent(result, processInstanceId, PROCESS_RESULT_EVENT_TYPE, expectedDecision);
+    }
+
+    protected JsonPath waitForEvent(String topic, long seconds) throws Exception {
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final AtomicReference<String> cloudEvent = new AtomicReference<>();
+        kafkaClient.consume(topic, rawCloudEvent -> {
+            cloudEvent.set(rawCloudEvent);
+            countDownLatch.countDown();
+        });
+        // give some time to consume the event and very the expected decision was made.
+        assertThat(countDownLatch.await(seconds, TimeUnit.SECONDS)).isTrue();
+        return new JsonPath(cloudEvent.get());
+    }
+
+    protected static void assertDecision(JsonPath jsonPath, String expectedDecision) {
+        String currentDecision = jsonPath.get(DECISION_PATH);
+        assertThat(currentDecision).isEqualTo(expectedDecision);
+    }
+
+    protected static void assertDecisionEvent(JsonPath cloudEventJsonPath,
+            String expectedProcessInstanceId,
+            String expectedEventType,
+            String expectedDecision) {
+        assertThat(cloudEventJsonPath.getString(EVENT_PROCESS_INSTANCE_ID_PATH)).isEqualTo(expectedProcessInstanceId);
+        assertThat(cloudEventJsonPath.getString(EVENT_TYPE_PATH)).isEqualTo(expectedEventType);
+        assertThat(cloudEventJsonPath.getString(EVENT_DECISION_PATH)).isEqualTo(expectedDecision);
+    }
+
+    protected static String buildProcessInput(int age) {
+        return "{\"workflowdata\": {\"age\": " + age + "} }";
+    }
+
+    //TODO rever esto
     //@Test
     void switchStateApprovedCondition() {
         // Start a new process instance that must be "Approved" and check the result.
@@ -72,33 +191,4 @@ class SwitchStateIT {
         JsonPath result = newProcessInstance(SWITCH_STATE_SERVICE_URL, buildProcessInput(-20));
         assertDecision(result, DECISION_INVALIDATED);
     }
-
-    @Test
-    void switchStateKAKA() throws Exception {
-        // Start a new process instance that must go through the default condition check the result.
-        String processInstanceId = newProcessInstanceAndGetId("switch_state_event_condition_timeouts_transition", "{\"workflowdata\" : \"\" }");
-
-        // prepare and send the response to the created process via kafka
-        String response = objectMapper.writeValueAsString(CloudEventBuilder.v1()
-                .withId(UUID.randomUUID().toString())
-                .withSource(URI.create(""))
-                .withType("visa_approved_in")
-                .withTime(OffsetDateTime.now())
-                .withExtension(
-                        "kogitoprocrefid", processInstanceId)
-                .withData(JsonCloudEventData.wrap(objectMapper.createObjectNode().put("answer", "blabla")))
-                .build());
-        kafkaClient.produce(response, "visa_approved_topic");
-
-    }
-
-    protected static void assertDecision(JsonPath jsonPath, String expectedDecision) {
-        String currentDecision = jsonPath.get(DECISION_PATH);
-        assertThat(currentDecision).isEqualTo(expectedDecision);
-    }
-
-    protected static String buildProcessInput(int age) {
-        return "{\"workflowdata\": {\"age\": " + age + "} }";
-    }
-
 }
