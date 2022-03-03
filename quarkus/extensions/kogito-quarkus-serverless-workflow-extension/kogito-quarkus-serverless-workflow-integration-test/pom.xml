@@ -144,6 +144,7 @@
                   <includes>
                     <include>callback-state.sw.json</include>
                     <include>callback-state-timeouts.sw.json</include>
+                    <include>switch-state-event-condition-timeouts-transition.sw.json</include>
                   </includes>
                 </resource>
               </resources>

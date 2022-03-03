@@ -16,7 +16,6 @@
 
 package org.kie.kogito.quarkus.workflows;
 
-import org.junit.jupiter.api.Test;
 import org.kie.kogito.testcontainers.quarkus.KafkaQuarkusTestResource;
 
 import io.quarkus.test.common.QuarkusTestResource;
@@ -37,7 +36,7 @@ class CallbackStateTimeoutsIT extends AbstractCallbackStateIT {
     private static final String CALLBACK_STATE_TIMEOUTS_EVENT_TYPE = "callback_state_timeouts_event_type";
     private static final String CALLBACK_STATE_TIMEOUTS_TOPIC = "callback_state_timeouts_event_type";
 
-    @Test
+    //@Test
     @SuppressWarnings("squid:S2699")
     void callbackStateTimeoutsSuccessful() throws Exception {
         executeCallbackStateSuccessfulPath(CALLBACK_STATE_TIMEOUTS_SERVICE_URL,
@@ -47,7 +46,7 @@ class CallbackStateTimeoutsIT extends AbstractCallbackStateIT {
                 CALLBACK_STATE_TIMEOUTS_TOPIC);
     }
 
-    @Test
+    //@Test
     void callbackStateTimeoutsExceeded() {
         // start a new process instance by sending a query and collect the process instance id.
         String processInput = buildProcessInput(SUCCESSFUL_QUERY);
@@ -58,7 +57,7 @@ class CallbackStateTimeoutsIT extends AbstractCallbackStateIT {
         assertProcessInstanceHasFinished(CALLBACK_STATE_TIMEOUTS_GET_BY_ID_URL, processInstanceId, 1, 10);
     }
 
-    @Test
+    //@Test
     @SuppressWarnings("squid:S2699")
     void callbackStateWithError() {
         executeCallbackStateWithErrorPath(CALLBACK_STATE_TIMEOUTS_SERVICE_URL, CALLBACK_STATE_TIMEOUTS_GET_BY_ID_URL);

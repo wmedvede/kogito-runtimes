@@ -1,0 +1,57 @@
+{
+  "id": "switch_state_event_condition_timeouts_end",
+  "name": "Switch State Event Condition Timeouts End Test",
+  "expressionLang": "jsonpath",
+  "version": "1.0",
+  "start": "ChooseOnEvent",
+  "events": [
+    {
+      "name": "visaApprovedEvent",
+      "source": "",
+      "type": "visa_approved_in"
+    },
+    {
+      "name": "visaDeniedEvent",
+      "source": "",
+      "type": "visa_denied_in"
+    }
+  ],
+  "states": [
+    {
+      "name": "ChooseOnEvent",
+      "type": "switch",
+      "eventConditions": [
+        {
+          "eventRef": "visaApprovedEvent",
+          "transition": "ApprovedVisa"
+        },
+        {
+          "eventRef": "visaDeniedEvent",
+          "transition": "DeniedVisa"
+        }
+      ],
+      "defaultCondition": {
+        "end": true
+      },
+      "timeouts": {
+        "eventTimeout": "PT2M"
+      }
+    },
+    {
+      "name": "ApprovedVisa",
+      "type": "inject",
+      "data": {
+        "decision": "Approved"
+      },
+      "end": true
+    },
+    {
+      "name": "DeniedVisa",
+      "type": "inject",
+      "data": {
+        "decision": "Denied"
+      },
+      "end": true
+    }
+  ]
+}

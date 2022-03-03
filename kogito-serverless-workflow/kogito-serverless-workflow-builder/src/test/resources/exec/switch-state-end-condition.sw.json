@@ -1,6 +1,6 @@
 {
-  "id": "switchworkflow",
-  "name": "switch-wf",
+  "id": "switch_state_end_condition",
+  "name": "Switch State End Condition Test",
   "expressionLang": "jsonpath",
   "version": "1.0",
   "start": "AddInfo",

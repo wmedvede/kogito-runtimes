@@ -28,6 +28,7 @@ import java.util.List;
 import org.jbpm.ruleflow.core.RuleFlowProcess;
 import org.jbpm.workflow.core.NodeContainer;
 import org.jbpm.workflow.core.node.CompositeContextNode;
+import org.jbpm.workflow.core.node.Split;
 import org.kie.api.definition.process.Connection;
 import org.kie.api.definition.process.Node;
 
@@ -91,6 +92,12 @@ public class WorkflowTestUtils {
         assertThat(node.getName())
                 .withFailMessage("Node: (%s, %s) is expected to have name: %s", node.getId(), node.getName(), expectedName)
                 .isEqualTo(expectedName);
+    }
+
+    public static void assertExclusiveSplit(Split splitNode, String name, int constrainsSize) {
+        assertHasName(splitNode, name);
+        assertThat(splitNode.getConstraints()).hasSize(constrainsSize);
+        assertThat(splitNode.getType()).isEqualTo(Split.TYPE_XOR);
     }
 
     @SuppressWarnings("unchecked")

@@ -20,11 +20,9 @@ import java.util.Collections;
 
 import org.jbpm.ruleflow.core.Metadata;
 import org.jbpm.ruleflow.core.RuleFlowProcess;
-import org.jbpm.workflow.core.Constraint;
 import org.jbpm.workflow.core.node.ActionNode;
 import org.jbpm.workflow.core.node.CompositeContextNode;
 import org.jbpm.workflow.core.node.EndNode;
-import org.jbpm.workflow.core.node.EventNode;
 import org.jbpm.workflow.core.node.Join;
 import org.jbpm.workflow.core.node.Split;
 import org.jbpm.workflow.core.node.StartNode;
@@ -367,84 +365,6 @@ public class ServerlessWorkflowParsingTest extends AbstractServerlessWorkflowPar
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "/exec/switch-state.sw.json", "/exec/switch-state.sw.yml" })
-    public void testSwitchWorkflow(String workflowLocation) throws Exception {
-        RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
-        assertEquals("switchworkflow", process.getId());
-        assertEquals("switch-wf", process.getName());
-        assertEquals("1.0", process.getVersion());
-        assertEquals("org.kie.kogito.serverless", process.getPackageName());
-        assertEquals(RuleFlowProcess.PUBLIC_VISIBILITY, process.getVisibility());
-
-        assertEquals(7, process.getNodes().length);
-
-        Node node = process.getNodes()[0];
-        assertTrue(node instanceof StartNode);
-        node = process.getNodes()[1];
-        assertTrue(node instanceof EndNode);
-        node = process.getNodes()[2];
-        assertTrue(node instanceof EndNode);
-        node = process.getNodes()[3];
-        assertTrue(node instanceof ActionNode);
-        node = process.getNodes()[4];
-        assertTrue(node instanceof Split);
-        node = process.getNodes()[5];
-        assertTrue(node instanceof ActionNode);
-        node = process.getNodes()[6];
-        assertTrue(node instanceof ActionNode);
-
-        Split split = (Split) process.getNodes()[4];
-        assertEquals("ChooseOnAge", split.getName());
-        assertEquals(2, split.getType());
-        assertEquals(2, split.getConstraints().size());
-
-        boolean haveDefaultConstraint = false;
-        for (Constraint constraint : split.getConstraints().values()) {
-            haveDefaultConstraint = haveDefaultConstraint || constraint.isDefault();
-        }
-
-        assertTrue(haveDefaultConstraint);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "/exec/switch-state-end-condition.sw.json", "/exec/switch-state-end-condition.sw.yml" })
-    public void testSwitchWithEndConditionsWorkflow(String workflowLocation) throws Exception {
-        RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
-        assertEquals("switchworkflow", process.getId());
-        assertEquals("switch-wf", process.getName());
-        assertEquals("1.0", process.getVersion());
-        assertEquals("org.kie.kogito.serverless", process.getPackageName());
-        assertEquals(RuleFlowProcess.PUBLIC_VISIBILITY, process.getVisibility());
-
-        assertEquals(6, process.getNodes().length);
-
-        Node node = process.getNodes()[0];
-        assertTrue(node instanceof StartNode);
-        node = process.getNodes()[1];
-        assertTrue(node instanceof ActionNode);
-        node = process.getNodes()[2];
-        assertTrue(node instanceof Split);
-        node = process.getNodes()[3];
-        assertTrue(node instanceof EndNode);
-        node = process.getNodes()[4];
-        assertTrue(node instanceof EndNode);
-        node = process.getNodes()[5];
-        assertTrue(node instanceof EndNode);
-
-        Split split = (Split) process.getNodes()[2];
-        assertEquals("ChooseOnAge", split.getName());
-        assertEquals(2, split.getType());
-        assertEquals(2, split.getConstraints().size());
-
-        boolean haveDefaultConstraint = false;
-        for (Constraint constraint : split.getConstraints().values()) {
-            haveDefaultConstraint = haveDefaultConstraint || constraint.isDefault();
-        }
-
-        assertTrue(haveDefaultConstraint);
-    }
-
-    @ParameterizedTest
     @ValueSource(strings = { "/exec/parallel-state.sw.json", "/exec/parallel-state.sw.yml" })
     public void testParallelWorkflow(String workflowLocation) throws Exception {
         RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
@@ -498,50 +418,6 @@ public class ServerlessWorkflowParsingTest extends AbstractServerlessWorkflowPar
         assertEquals("workflowdata", actionNode.getMetaData("MappingVariable"));
         assertEquals("kafka", actionNode.getMetaData("TriggerRef"));
         assertEquals("com.fasterxml.jackson.databind.JsonNode", actionNode.getMetaData("MessageType"));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "/exec/eventbased-switch-state.sw.json", "/exec/eventbased-switch-state.sw.yml" })
-    public void testEventBasedSwitchWorkflow(String workflowLocation) throws Exception {
-        RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
-        assertEquals("eventswitchworkflow", process.getId());
-        assertEquals("event-switch-wf", process.getName());
-        assertEquals("1.0", process.getVersion());
-        assertEquals("org.kie.kogito.serverless", process.getPackageName());
-        assertEquals(RuleFlowProcess.PUBLIC_VISIBILITY, process.getVisibility());
-
-        assertEquals(12, process.getNodes().length);
-
-        Node node = process.getNodes()[0];
-        assertTrue(node instanceof StartNode);
-        node = process.getNodes()[1];
-        assertTrue(node instanceof EndNode);
-        node = process.getNodes()[2];
-        assertTrue(node instanceof EndNode);
-        node = process.getNodes()[3];
-        assertTrue(node instanceof ActionNode);
-        node = process.getNodes()[4];
-        assertTrue(node instanceof Split);
-        node = process.getNodes()[5];
-        assertTrue(node instanceof ActionNode);
-        node = process.getNodes()[6];
-        assertTrue(node instanceof ActionNode);
-        node = process.getNodes()[7];
-        assertTrue(node instanceof ActionNode);
-        node = process.getNodes()[8];
-        assertTrue(node instanceof EventNode);
-        node = process.getNodes()[10];
-        assertTrue(node instanceof EventNode);
-
-        Split split = (Split) process.getNodes()[4];
-        assertEquals("ChooseOnEvent", split.getName());
-        assertEquals(Split.TYPE_XAND, split.getType());
-
-        EventNode firstEventNode = (EventNode) process.getNodes()[8];
-        assertEquals("visaApprovedEvent", firstEventNode.getName());
-
-        EventNode secondEventNode = (EventNode) process.getNodes()[10];
-        assertEquals("visaDeniedEvent", secondEventNode.getName());
     }
 
     @ParameterizedTest
@@ -625,31 +501,6 @@ public class ServerlessWorkflowParsingTest extends AbstractServerlessWorkflowPar
 
         ActionNode actionNode4 = (ActionNode) process.getNodes()[7];
         assertEquals("TestKafkaEvent4", actionNode4.getName());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "/exec/switch-state-produce-events.sw.json", "/exec/switch-state-produce-events.sw.yml" })
-    public void testSwitchProduceEventsOnTransitionWorkflow(String workflowLocation) throws Exception {
-        RuleFlowProcess process = (RuleFlowProcess) getWorkflowParser(workflowLocation);
-        assertEquals("switchworkflow", process.getId());
-        assertEquals("switch-wf", process.getName());
-        assertEquals("1.0", process.getVersion());
-        assertEquals("org.kie.kogito.serverless", process.getPackageName());
-        assertEquals(RuleFlowProcess.PUBLIC_VISIBILITY, process.getVisibility());
-
-        assertEquals(15, process.getNodes().length);
-
-        Split split = (Split) process.getNodes()[4];
-        assertEquals("ChooseOnAge", split.getName());
-        assertEquals(2, split.getType());
-        assertEquals(2, split.getConstraints().size());
-
-        boolean haveDefaultConstraint = false;
-        for (Constraint constraint : split.getConstraints().values()) {
-            haveDefaultConstraint = haveDefaultConstraint || constraint.isDefault();
-        }
-
-        assertTrue(haveDefaultConstraint);
     }
 
     @ParameterizedTest
