@@ -52,6 +52,12 @@ class SwitchStateIT {
     private static final String SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL = "/switch_state_event_condition_timeouts_transition";
     private static final String SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL = SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL + "/{id}";
 
+    private static final String SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL = "/switch_state_event_condition_timeouts_transition2";
+    private static final String SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL_GET_BY_ID_URL = SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL + "/{id}";
+
+    private static final String SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_URL = "/switch_state_event_condition_timeouts_end";
+    private static final String SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_GET_BY_ID_URL = SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_URL + "/{id}";
+
     private static final String VISA_APPROVED_EVENT_TOPIC = "visa_approved_topic";
     private static final String VISA_APPROVED_EVENT_TYPE = "visa_approved_in";
     private static final String VISA_DENIED_EVENT_TOPIC = "visa_denied_topic";
@@ -96,32 +102,96 @@ class SwitchStateIT {
 
     @Test
     void switchStateEventConditionTimeoutsTransitionApproved() throws Exception {
-        switchStateEventConditionTimeoutsTransitionWithEvent(VISA_APPROVED_EVENT_TYPE, VISA_APPROVED_EVENT_TOPIC, DECISION_APPROVED);
+        switchStateEventConditionTimeoutsTransitionBasedWithEvent(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL,
+                SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL,
+                VISA_APPROVED_EVENT_TYPE,
+                VISA_APPROVED_EVENT_TOPIC,
+                DECISION_APPROVED);
     }
 
     @Test
     void switchStateEventConditionTimeoutsTransitionDenied() throws Exception {
-        switchStateEventConditionTimeoutsTransitionWithEvent(VISA_DENIED_EVENT_TYPE, VISA_DENIED_EVENT_TOPIC, DECISION_DENIED);
+        switchStateEventConditionTimeoutsTransitionBasedWithEvent(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL,
+                SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL,
+                VISA_DENIED_EVENT_TYPE,
+                VISA_DENIED_EVENT_TOPIC,
+                DECISION_DENIED);
     }
 
     @Test
     void switchStateEventConditionTimeoutsTransitionTimeoutsExceeded() throws Exception {
-        // Start a new process instance.
-        String processInstanceId = newProcessInstanceAndGetId(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL, EMPTY_WORKFLOW_DATA);
-        // Give enough time for the timeout to exceed.
-        assertProcessInstanceHasFinished(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL, processInstanceId, 1, 180);
-        // When the process has finished the default case event must arrive.
-        JsonPath result = waitForEvent(KOGITO_OUTGOING_STREAM_TOPIC, 50);
-        assertDecisionEvent(result, processInstanceId, PROCESS_RESULT_EVENT_TYPE, DECISION_NO_DECISION);
+        switchStateEventConditionTimeoutsTransitionBasedWithTimeoutsExceeded(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL,
+                SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL,
+                DECISION_NO_DECISION);
     }
 
-    private void switchStateEventConditionTimeoutsTransitionWithEvent(String eventTypeToSend,
+    @Test
+    void switchStateEventConditionTimeoutsTransition2Approved() throws Exception {
+        switchStateEventConditionTimeoutsTransitionBasedWithEvent(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL,
+                SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL_GET_BY_ID_URL,
+                VISA_APPROVED_EVENT_TYPE,
+                VISA_APPROVED_EVENT_TOPIC,
+                DECISION_APPROVED);
+    }
+
+    @Test
+    void switchStateEventConditionTimeoutsTransition2Denied() throws Exception {
+        switchStateEventConditionTimeoutsTransitionBasedWithEvent(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL,
+                SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL_GET_BY_ID_URL,
+                VISA_DENIED_EVENT_TYPE,
+                VISA_DENIED_EVENT_TOPIC,
+                DECISION_DENIED);
+    }
+
+    @Test
+    void switchStateEventConditionTimeoutsTransition2TimeoutsExceeded() throws Exception {
+        switchStateEventConditionTimeoutsTransitionBasedWithTimeoutsExceeded(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL,
+                SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL_GET_BY_ID_URL,
+                DECISION_DENIED);
+    }
+
+    @Test
+    void switchStateEventConditionTimeoutsEndTApproved() throws Exception {
+        switchStateEventConditionTimeoutsTransitionBasedWithEvent(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_URL,
+                SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_GET_BY_ID_URL,
+                VISA_APPROVED_EVENT_TYPE,
+                VISA_APPROVED_EVENT_TOPIC,
+                DECISION_APPROVED);
+    }
+
+    @Test
+    void switchStateEventConditionTimeoutsEndDenied() throws Exception {
+        switchStateEventConditionTimeoutsTransitionBasedWithEvent(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_URL,
+                SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_GET_BY_ID_URL,
+                VISA_DENIED_EVENT_TYPE,
+                VISA_DENIED_EVENT_TOPIC,
+                DECISION_DENIED);
+    }
+
+    @Test
+    void switchStateEventConditionTimeoutsEndTimeoutsExceeded() throws Exception {
+        // Start a new process instance.
+        String processInstanceId = newProcessInstanceAndGetId(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_URL, EMPTY_WORKFLOW_DATA);
+        // Give enough time for the timeout to exceed.
+        assertProcessInstanceHasFinished(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_END_GET_BY_ID_URL, processInstanceId, 1, 180);
+        // When the process has finished the default case event must arrive.
+        JsonPath result = waitForEvent(KOGITO_OUTGOING_STREAM_TOPIC, 50);
+        assertThat(result.getString("data")).isEmpty();
+    }
+
+    /**
+     * Executes the happy path for the SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL and the
+     * SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL processes.
+     */
+    private void switchStateEventConditionTimeoutsTransitionBasedWithEvent(String processUrl,
+            String processGetByIdUrl,
+            String eventTypeToSend,
             String eventTopicToSend,
             String expectedDecision) throws Exception {
         // Start a new process instance.
-        String processInstanceId = newProcessInstanceAndGetId(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL, EMPTY_WORKFLOW_DATA);
+        String processInstanceId = newProcessInstanceAndGetId(processUrl, EMPTY_WORKFLOW_DATA);
 
-        // Send the event to activate the approval path.
+        // Send the event to activate the switch state.
         String response = objectMapper.writeValueAsString(CloudEventBuilder.v1()
                 .withId(UUID.randomUUID().toString())
                 .withSource(URI.create(""))
@@ -133,9 +203,25 @@ class SwitchStateIT {
         kafkaClient.produce(response, eventTopicToSend);
 
         // Give some time for the event to be processed and the process to finish.
-        assertProcessInstanceHasFinished(SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL_GET_BY_ID_URL, processInstanceId, 1, 180);
+        assertProcessInstanceHasFinished(processGetByIdUrl, processInstanceId, 1, 180);
 
         // Give some time to consume the event and very the expected decision was made.
+        JsonPath result = waitForEvent(KOGITO_OUTGOING_STREAM_TOPIC, 50);
+        assertDecisionEvent(result, processInstanceId, PROCESS_RESULT_EVENT_TYPE, expectedDecision);
+    }
+
+    /**
+     * Executes timeout exceeded path for the SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION_URL and the
+     * SWITCH_STATE_EVENT_CONDITION_TIMEOUTS_TRANSITION2_URL processes.
+     */
+    private void switchStateEventConditionTimeoutsTransitionBasedWithTimeoutsExceeded(String processUrl,
+            String processGetByIdUrl,
+            String expectedDecision) throws Exception {
+        // Start a new process instance.
+        String processInstanceId = newProcessInstanceAndGetId(processUrl, EMPTY_WORKFLOW_DATA);
+        // Give enough time for the timeout to exceed.
+        assertProcessInstanceHasFinished(processGetByIdUrl, processInstanceId, 1, 180);
+        // When the process has finished the default case event must arrive.
         JsonPath result = waitForEvent(KOGITO_OUTGOING_STREAM_TOPIC, 50);
         assertDecisionEvent(result, processInstanceId, PROCESS_RESULT_EVENT_TYPE, expectedDecision);
     }
@@ -147,7 +233,7 @@ class SwitchStateIT {
             cloudEvent.set(rawCloudEvent);
             countDownLatch.countDown();
         });
-        // give some time to consume the event and very the expected decision was made.
+        // give some time to consume the event and verifyy the expected decision was made.
         assertThat(countDownLatch.await(seconds, TimeUnit.SECONDS)).isTrue();
         return new JsonPath(cloudEvent.get());
     }

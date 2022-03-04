@@ -1,7 +1,6 @@
 {
   "id": "switch_state_event_condition_timeouts_end",
   "name": "Switch State Event Condition Timeouts End Test",
-  "expressionLang": "jsonpath",
   "version": "1.0",
   "start": "ChooseOnEvent",
   "events": [
@@ -14,6 +13,11 @@
       "name": "visaDeniedEvent",
       "source": "",
       "type": "visa_denied_in"
+    },
+    {
+      "name": "sendProcessResultEvent",
+      "kind": "produced",
+      "type": "process_result_event"
     }
   ],
   "states": [
@@ -31,26 +35,45 @@
         }
       ],
       "defaultCondition": {
-        "end": true
+        "end": {
+          "produceEvents": [
+            {
+              "eventRef": "sendProcessResultEvent",
+              "data": "{decision: \\\"DefaultConditionEnd\\\"}"
+            }
+          ]
+        }
       },
       "timeouts": {
-        "eventTimeout": "PT2M"
+        "eventTimeout": "PT30S"
       }
     },
     {
       "name": "ApprovedVisa",
-      "type": "inject",
-      "data": {
-        "decision": "Approved"
-      },
+      "type": "operation",
+      "actions": [
+        {
+          "name": "sendApprovedVisaResult",
+          "eventRef": {
+            "triggerEventRef": "sendProcessResultEvent",
+            "data": "{decision: \\\"Approved\\\"}"
+          }
+        }
+      ],
       "end": true
     },
     {
       "name": "DeniedVisa",
-      "type": "inject",
-      "data": {
-        "decision": "Denied"
-      },
+      "type": "operation",
+      "actions": [
+        {
+          "name": "sendDeniedVisaResult",
+          "eventRef": {
+            "triggerEventRef": "sendProcessResultEvent",
+            "data": "{decision: \\\"Denied\\\"}"
+          }
+        }
+      ],
       "end": true
     }
   ]
