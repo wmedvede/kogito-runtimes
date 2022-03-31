@@ -20,7 +20,6 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.kogito.test.quarkus.kafka.KafkaTestClient;
@@ -47,7 +46,6 @@ abstract class AbstractCallbackStateIT {
 
     static final String ANSWER = "ANSWER";
 
-    @ConfigProperty(name = KafkaQuarkusTestResource.KOGITO_KAFKA_PROPERTY)
     String kafkaBootstrapServers;
 
     ObjectMapper objectMapper;
@@ -56,6 +54,7 @@ abstract class AbstractCallbackStateIT {
 
     @BeforeEach
     void setup() {
+        kafkaBootstrapServers = System.getProperty(KafkaQuarkusTestResource.KOGITO_KAFKA_PROPERTY);
         kafkaClient = new KafkaTestClient(kafkaBootstrapServers);
         objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
