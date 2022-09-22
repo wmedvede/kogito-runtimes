@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.jbpm.ruleflow.core.RuleFlowNodeContainerFactory;
 import org.jbpm.ruleflow.core.factory.CompositeContextNodeFactory;
 import org.jbpm.ruleflow.core.factory.NodeFactory;
+import org.jbpm.ruleflow.core.factory.SplitFactory;
 import org.jbpm.ruleflow.core.factory.StartNodeFactory;
 import org.jbpm.workflow.core.node.Join;
 import org.jbpm.workflow.core.node.Split;
@@ -31,7 +32,11 @@ import io.serverlessworkflow.api.Workflow;
 import io.serverlessworkflow.api.events.OnEvents;
 import io.serverlessworkflow.api.states.EventState;
 
+import static org.kie.kogito.serverless.workflow.parser.handlers.NodeFactoryUtils.joinExclusiveNode;
 import static org.kie.kogito.serverless.workflow.parser.handlers.NodeFactoryUtils.messageNode;
+import static org.kie.kogito.serverless.workflow.parser.handlers.NodeFactoryUtils.splitNode;
+import static org.kie.kogito.serverless.workflow.parser.handlers.NodeFactoryUtils.timerNode;
+import static org.kie.kogito.serverless.workflow.utils.TimeoutsConfigResolver.resolveEventTimeout;
 
 public class EventHandler extends CompositeContextNodeHandler<EventState> {
 
@@ -46,7 +51,25 @@ public class EventHandler extends CompositeContextNodeHandler<EventState> {
 
     @Override
     public MakeNodeResult makeNode(RuleFlowNodeContainerFactory<?, ?> factory) {
-        return joinNodes(factory, state.getOnEvents().stream().map(onEvent -> processOnEvent(factory, onEvent)).collect(Collectors.toList()));
+        MakeNodeResult result = joinNodes(factory, state.getOnEvents().stream().map(onEvent -> processOnEvent(factory, onEvent)).collect(Collectors.toList()));
+        String eventTimeout = resolveEventTimeout(state, workflow);
+        if (isStartState || eventTimeout == null) {
+            return result;
+        } else {
+            return joinTimerNode(factory, result, eventTimeout);
+        }
+    }
+
+    private MakeNodeResult joinTimerNode(RuleFlowNodeContainerFactory<?, ?> factory, MakeNodeResult result, String eventTimeout) {
+        // Create the split node to parallelize the eventTimeout control and the normal execution path
+        SplitFactory<?> splitNode = splitNode(factory.splitNode(parserContext.newId())).name(state.getName() + "TimeoutSplit");
+        // Create the timer node with the eventTimeout and connect it with the split.
+        NodeFactory<?, ?> timerNode = connect(splitNode, timerNode(factory.timerNode(parserContext.newId()), eventTimeout));
+        // Create the join node for joining the eventTimeout control and the normal execution path
+        NodeFactory<?, ?> joinNode = connect(timerNode, joinExclusiveNode(factory.joinNode(parserContext.newId())).name(state.getName() + "TimeoutJoin"));
+        // connect the normal execution path with the split and join nodes respectively
+        connectNode(result, splitNode, joinNode);
+        return new MakeNodeResult(splitNode, joinNode);
     }
 
     private MakeNodeResult processOnEvent(RuleFlowNodeContainerFactory<?, ?> factory, OnEvents onEvent) {

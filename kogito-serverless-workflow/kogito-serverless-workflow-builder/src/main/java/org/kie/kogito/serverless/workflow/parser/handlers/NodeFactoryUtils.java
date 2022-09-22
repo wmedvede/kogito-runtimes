@@ -96,6 +96,12 @@ public class NodeFactoryUtils {
                 .collect(Collectors.toSet()));
     }
 
+    public static <T extends RuleFlowNodeContainerFactory<T, ?>> SplitFactory<T> splitNode(SplitFactory<T> nodeFactory) {
+        return nodeFactory.name("Split_" + nodeFactory.getNode().getId())
+                .type(Split.TYPE_AND)
+                .metaData(UNIQUE_ID, Long.toString(nodeFactory.getNode().getId()));
+    }
+
     public static <T extends RuleFlowNodeContainerFactory<T, ?>> SplitFactory<T> eventBasedExclusiveSplitNode(SplitFactory<T> nodeFactory) {
         return nodeFactory.name("ExclusiveSplit_" + nodeFactory.getNode().getId())
                 .type(Split.TYPE_XAND)
