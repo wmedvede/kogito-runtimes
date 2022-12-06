@@ -70,6 +70,10 @@ public class HttpRecipient extends Recipient<byte[]> {
         return this;
     }
 
+    public String getHeader(String name) {
+        return headers != null ? headers.get(name) : null;
+    }
+
     public Map<String, String> getQueryParams() {
         return queryParams;
     }
@@ -81,6 +85,10 @@ public class HttpRecipient extends Recipient<byte[]> {
     public HttpRecipient addQueryParam(String name, String value) {
         queryParams.put(name, value);
         return this;
+    }
+
+    public String getQueryParam(String name) {
+        return queryParams != null ? queryParams.get(name) : null;
     }
 
     @Override

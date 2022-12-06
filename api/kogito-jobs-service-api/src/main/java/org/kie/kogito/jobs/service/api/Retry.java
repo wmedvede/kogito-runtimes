@@ -120,7 +120,7 @@ public class Retry {
         }
 
         public Builder durationUnit(TemporalUnit durationUnit) {
-            retry.setDelayUnit(durationUnit);
+            retry.setDurationUnit(durationUnit);
             return this;
         }
 
