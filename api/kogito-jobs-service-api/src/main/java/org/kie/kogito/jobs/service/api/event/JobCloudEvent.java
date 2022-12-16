@@ -132,8 +132,9 @@ public abstract class JobCloudEvent<T> implements CloudEventAttributes {
                 return this.subject;
             case TIME:
                 return this.time;
+            default:
+                throw new IllegalArgumentException("Spec version v1 doesn't have attribute named " + attributeName);
         }
-        throw new IllegalArgumentException("Spec version v1 doesn't have attribute named " + attributeName);
     }
 
     @JsonIgnore

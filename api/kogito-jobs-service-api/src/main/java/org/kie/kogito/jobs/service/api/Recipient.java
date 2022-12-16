@@ -22,25 +22,31 @@ import org.eclipse.microprofile.openapi.annotations.media.SchemaProperty;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@Schema(discriminatorProperty = "type",
-        properties = { @SchemaProperty(name = "type", type = SchemaType.STRING) },
-        requiredProperties = { "type" },
+import static org.kie.kogito.jobs.service.api.Recipient.TYPE_PROPERTY;
+
+@Schema(discriminatorProperty = TYPE_PROPERTY,
+        properties = { @SchemaProperty(name = TYPE_PROPERTY, type = SchemaType.STRING) },
+        requiredProperties = { TYPE_PROPERTY },
         description = "Generic definition for a Recipient, users must provide instances of subclasses of this schema to create a job.")
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-public abstract class Recipient<T> {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = TYPE_PROPERTY)
+public abstract class Recipient {
 
-    @Schema(description = "This value represents the information that is sent to the recipient entity at the job execution, and might vary depending on the particular recipient subclass.")
-    protected T payload;
+    static final String TYPE_PROPERTY = "type";
+    public static final String PAYLOAD_PROPERTY = "payload";
 
-    public Recipient() {
+    // Avoid wildcards due to OpenApi-yml document generation issue that produces duplicated schemas PayloadData and PayloadDataObject.
+    @SuppressWarnings("rawtypes")
+    protected PayloadData payload;
+
+    protected Recipient() {
         // marshalling constructor.
     }
 
-    public T getPayload() {
+    public PayloadData getPayload() {
         return payload;
     }
 
-    public void setPayload(T payload) {
+    public void setPayload(PayloadData payload) {
         this.payload = payload;
     }
 

@@ -22,7 +22,6 @@ import java.time.OffsetDateTime;
 import org.kie.kogito.jobs.service.api.Job;
 import org.kie.kogito.jobs.service.api.Retry;
 import org.kie.kogito.jobs.service.api.TemporalUnit;
-import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient;
 import org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule;
 
 import io.cloudevents.SpecVersion;
@@ -74,14 +73,14 @@ public class TestConstants {
                         .delay(SCHEDULE_DELAY)
                         .delayUnit(SCHEDULE_DELAY_UNIT)
                         .build())
-                .recipient(HttpRecipient.builder()
-                        .payload(RECIPIENT_PAYLOAD)
-                        .url(RECIPIENT_URL)
-                        .method(RECIPIENT_METHOD)
-                        .header(RECIPIENT_HEADER_1, RECIPIENT_HEADER_1_VALUE)
-                        .queryParam(RECIPIENT_QUERY_PARAM_1, RECIPIENT_QUERY_PARAM_1_VALUE)
-                        .queryParam(RECIPIENT_QUERY_PARAM_2, RECIPIENT_QUERY_PARAM_2_VALUE)
-                        .build())
+                //                .recipient(HttpRecipient.builder()
+                //                        .payload(RECIPIENT_PAYLOAD)
+                //                        .url(RECIPIENT_URL)
+                //                        .method(RECIPIENT_METHOD)
+                //                        .header(RECIPIENT_HEADER_1, RECIPIENT_HEADER_1_VALUE)
+                //                        .queryParam(RECIPIENT_QUERY_PARAM_1, RECIPIENT_QUERY_PARAM_1_VALUE)
+                //                        .queryParam(RECIPIENT_QUERY_PARAM_2, RECIPIENT_QUERY_PARAM_2_VALUE)
+                //                        .build())
                 .build();
     }
 }

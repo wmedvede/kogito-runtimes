@@ -16,9 +16,10 @@
 
 package org.kie.kogito.jobs.service.api;
 
-public interface RecipientDescriptor<R extends Recipient> extends Descriptor {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-    String getName();
+public interface HasData<T> {
 
-    Class<R> getType();
+    @JsonIgnore
+    T getData();
 }

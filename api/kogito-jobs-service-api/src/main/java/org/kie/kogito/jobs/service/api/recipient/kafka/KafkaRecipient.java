@@ -20,14 +20,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.kie.kogito.jobs.service.api.PayloadData;
 import org.kie.kogito.jobs.service.api.Recipient;
 
-@Schema(description = "Recipient definition that delivers a kafka message that contains the configured \"payload\".", allOf = { Recipient.class })
-public class KafkaRecipient extends Recipient<byte[]> {
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-    @Schema(description = "A comma-separated list of host:port to use to establish the connection to the kafka cluster.", required = true)
+import static org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipient.*;
+
+@Schema(description = "Recipient definition that delivers a kafka message that contains the configured \"payload\".",
+        allOf = { Recipient.class },
+        requiredProperties = { BOOTSTRAP_SERVERS_PROPERTY, TOPIC_NAME_PROPERTY })
+@JsonPropertyOrder({ BOOTSTRAP_SERVERS_PROPERTY, TOPIC_NAME_PROPERTY, HEADERS_PROPERTY, PAYLOAD_PROPERTY })
+public class KafkaRecipient extends Recipient {
+
+    static final String BOOTSTRAP_SERVERS_PROPERTY = "bootstrapServers";
+    static final String TOPIC_NAME_PROPERTY = "topicName";
+    static final String HEADERS_PROPERTY = "headers";
+
+    @Schema(description = "A comma-separated list of host:port to use to establish the connection to the kafka cluster.")
     private String bootstrapServers;
-    @Schema(description = "Topic name for the message delivery.", required = true)
+    @Schema(description = "Topic name for the message delivery.")
     private String topicName;
     @Schema(description = "Headers to send with the kafka message.")
     private Map<String, String> headers;
@@ -87,7 +99,7 @@ public class KafkaRecipient extends Recipient<byte[]> {
             this.recipient = recipient;
         }
 
-        public Builder payload(byte[] payload) {
+        public Builder payload(PayloadData<?> payload) {
             recipient.setPayload(payload);
             return this;
         }

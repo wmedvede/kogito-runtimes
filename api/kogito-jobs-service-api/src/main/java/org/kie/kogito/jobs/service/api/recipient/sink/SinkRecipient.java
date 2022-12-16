@@ -17,21 +17,31 @@
 package org.kie.kogito.jobs.service.api.recipient.sink;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.kie.kogito.jobs.service.api.PayloadData;
 import org.kie.kogito.jobs.service.api.Recipient;
 
-import io.cloudevents.CloudEvent;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@Schema(description = "Recipient definition that delivers a cloud event to a knative sink.", allOf = { Recipient.class })
-public class SinkRecipient extends Recipient<CloudEvent> {
+import static org.kie.kogito.jobs.service.api.Recipient.PAYLOAD_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipient.CONTENT_MODE_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipient.SINK_URL_PROPERTY;
+
+@Schema(description = "Recipient definition that delivers a cloud event to a knative sink.",
+        allOf = { Recipient.class },
+        requiredProperties = { SINK_URL_PROPERTY, CONTENT_MODE_PROPERTY, PAYLOAD_PROPERTY })
+@JsonPropertyOrder({ SINK_URL_PROPERTY, CONTENT_MODE_PROPERTY, PAYLOAD_PROPERTY })
+public class SinkRecipient extends Recipient {
+
+    static final String SINK_URL_PROPERTY = "sinkUrl";
+    static final String CONTENT_MODE_PROPERTY = "contentMode";
 
     public enum ContentMode {
         BINARY,
         STRUCTURED
     }
 
-    @Schema(description = "Url of the knative sink that will receive the cloud event.", required = true)
+    @Schema(description = "Url of the knative sink that will receive the cloud event.")
     private String sinkUrl;
-    @Schema(description = "Content mode for the event transfer to knative sink.", required = true, defaultValue = "BINARY")
     private ContentMode contentMode = ContentMode.BINARY;
 
     public SinkRecipient() {
@@ -74,7 +84,7 @@ public class SinkRecipient extends Recipient<CloudEvent> {
             this.recipient = recipient;
         }
 
-        public Builder payload(CloudEvent payload) {
+        public Builder payload(PayloadData<?> payload) {
             recipient.setPayload(payload);
             return this;
         }

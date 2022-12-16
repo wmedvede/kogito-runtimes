@@ -20,14 +20,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.kie.kogito.jobs.service.api.PayloadData;
 import org.kie.kogito.jobs.service.api.Recipient;
 
-@Schema(description = "Recipient definition that executes a http request on a given url and sends the configured \"payload\" as the body.", allOf = { Recipient.class })
-public class HttpRecipient extends Recipient<byte[]> {
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-    @Schema(description = "Url of the recipient that will receive the request.", required = true)
+import static org.kie.kogito.jobs.service.api.Recipient.PAYLOAD_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.HEADERS_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.METHOD_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.QUERY_PARAMS_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.URL_PROPERTY;
+
+@Schema(description = "Recipient definition that executes a http request on a given url and sends the configured \"payload\" as the body.",
+        allOf = { Recipient.class },
+        requiredProperties = { URL_PROPERTY, METHOD_PROPERTY })
+@JsonPropertyOrder({ URL_PROPERTY, METHOD_PROPERTY, HEADERS_PROPERTY, QUERY_PARAMS_PROPERTY, PAYLOAD_PROPERTY })
+public class HttpRecipient extends Recipient {
+
+    static final String URL_PROPERTY = "url";
+    static final String METHOD_PROPERTY = "method";
+    static final String HEADERS_PROPERTY = "headers";
+    static final String QUERY_PARAMS_PROPERTY = "queryParams";
+
+    @Schema(description = "Url of the recipient that will receive the request.")
     private String url;
-    @Schema(description = "Http method to use for the request.", required = true, defaultValue = "POST",
+    @Schema(description = "Http method to use for the request.",
+            defaultValue = "POST",
             enumeration = { "POST", "GET", "HEAD", "PUT", "DELETE", "PATCH", "OPTIONS" })
     private String method = "POST";
     @Schema(description = "Http headers to send with the request.")
@@ -113,7 +131,7 @@ public class HttpRecipient extends Recipient<byte[]> {
             this.recipient = recipient;
         }
 
-        public Builder payload(byte[] payload) {
+        public Builder payload(PayloadData<?> payload) {
             recipient.setPayload(payload);
             return this;
         }

@@ -16,9 +16,29 @@
 
 package org.kie.kogito.jobs.service.api;
 
-public interface RecipientDescriptor<R extends Recipient> extends Descriptor {
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-    String getName();
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    Class<R> getType();
+@Schema(allOf = { PayloadData.class })
+public class StringPayloadData extends PayloadData<String> {
+
+    @JsonProperty("data")
+    private String dataString;
+
+    public StringPayloadData() {
+        // Marshalling constructor.
+    }
+
+    private StringPayloadData(String data) {
+        this.dataString = data;
+    }
+
+    public String getData() {
+        return dataString;
+    }
+
+    public static StringPayloadData from(String data) {
+        return new StringPayloadData(data);
+    }
 }

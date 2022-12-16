@@ -20,8 +20,19 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.kie.kogito.jobs.service.api.Schedule;
 import org.kie.kogito.jobs.service.api.TemporalUnit;
 
-@Schema(description = "Timer schedules establishes that a job must be executed at a given date time and can be repeated a configurable number of times.", allOf = { Schedule.class })
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import static org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule.*;
+
+@Schema(description = "Timer schedules establishes that a job must be executed at a given date time and can be repeated a configurable number of times.",
+        allOf = { Schedule.class })
+@JsonPropertyOrder({ START_TIME_PROPERTY, REPEAT_COUNT_PROPERTY, DELAY_PROPERTY, DELAY_UNIT_PROPERTY })
 public class TimerSchedule extends Schedule {
+
+    static final String START_TIME_PROPERTY = "startTime";
+    static final String REPEAT_COUNT_PROPERTY = "repeatCount";
+    static final String DELAY_PROPERTY = "delay";
+    static final String DELAY_UNIT_PROPERTY = "delayUnit";
 
     @Schema(description = "Initial fire time for the job in the ISO-8601 standard.", example = "2023-01-30T12:01:15+01:00")
     private String startTime;
@@ -29,7 +40,6 @@ public class TimerSchedule extends Schedule {
     private Integer repeatCount = 0;
     @Schema(description = "Time delay between executions.", defaultValue = "0")
     private Long delay = 0L;
-    @Schema(description = "Time unit for the delay", defaultValue = "MILLIS")
     private TemporalUnit delayUnit = TemporalUnit.MILLIS;
 
     public TimerSchedule() {
