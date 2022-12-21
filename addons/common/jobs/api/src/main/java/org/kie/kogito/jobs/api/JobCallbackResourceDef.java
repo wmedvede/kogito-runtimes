@@ -19,6 +19,7 @@ package org.kie.kogito.jobs.api;
 import org.kie.kogito.jobs.ProcessInstanceJobDescription;
 import org.kie.kogito.jobs.service.api.TemporalUnit;
 import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient;
+import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipientStringPayloadData;
 import org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule;
 
 /**
@@ -78,15 +79,17 @@ public class JobCallbackResourceDef {
                 .build();
     }
 
-    private static HttpRecipient buildRecipient(ProcessInstanceJobDescription description, String callback) {
-        return HttpRecipient.builder()
-                .url(callback)
-                .header("kogito-processInstanceId", description.processInstanceId())
-                .header("kogito-rootProcessInstanceId", description.rootProcessInstanceId())
-                .header("kogito-processId", description.processId())
-                .header("kogito-rootProcessId", description.rootProcessId())
-                .header("kogito-nodeInstanceId", description.nodeInstanceId())
-                .build();
+    private static HttpRecipient<HttpRecipientStringPayloadData> buildRecipient(ProcessInstanceJobDescription description, String callback) {
+        //TODO
+        return null;
+        //        return HttpRecipient.builder(HttpRecipientStringPayloadData.from(null))
+        //                .url(callback)
+        //                .header("kogito-processInstanceId", description.processInstanceId())
+        //                .header("kogito-rootProcessInstanceId", description.rootProcessInstanceId())
+        //                .header("kogito-processId", description.processId())
+        //                .header("kogito-rootProcessId", description.rootProcessId())
+        //                .header("kogito-nodeInstanceId", description.nodeInstanceId())
+        //                .build();
     }
 
     private static TimerSchedule buildSchedule(ProcessInstanceJobDescription description) {

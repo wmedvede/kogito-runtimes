@@ -1,0 +1,422 @@
+---
+openapi: 3.0.3
+info:
+  title: jobs-service-public-api-tests API
+  version: 1.0.0-SNAPSHOT
+paths:
+  /external-services/json-receiver:
+    post:
+      tags:
+      - External Services Resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+  /external-services/octet-receiver:
+    post:
+      tags:
+      - External Services Resource
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              format: binary
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+  /external-services/xml-receiver:
+    post:
+      tags:
+      - External Services Resource
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/xml:
+              schema:
+                type: string
+  /jobs:
+    post:
+      tags:
+      - Job Service Resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Job'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+  /jobs/find:
+    get:
+      tags:
+      - Job Service Resource
+      parameters:
+      - name: correlationId
+        in: query
+        schema:
+          default: ""
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+  /jobs/{id}:
+    get:
+      tags:
+      - Job Service Resource
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+components:
+  schemas:
+    Recipient:
+      description: "Generic definition for a Recipient, users must provide instances\
+        \ of subclasses of this schema to create a job."
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          kafka: '#/components/schemas/KafkaRecipient'
+          http: '#/components/schemas/HttpRecipient'
+          sink: '#/components/schemas/SinkRecipient'
+    Schedule:
+      description: "Generic definition for a Schedule, users must provide instances\
+        \ of subclasses of this schema."
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          cron: '#/components/schemas/CronSchedule'
+          timer: '#/components/schemas/TimerSchedule'
+    ContentMode:
+      enum:
+      - BINARY
+      - STRUCTURED
+      type: string
+    CronSchedule:
+      description: Cron schedules establishes that a job must be executed with a periodicity
+        based on a unix like crontab expression.
+      required:
+      - expression
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Schedule'
+      properties:
+        expression:
+          description: "Cron expression for the job execution, for more information\
+            \ <a href=\"https://en.wikipedia.org/wiki/Cron#Overview\" target=\"_blank\"\
+            >see</a>."
+          type: string
+        timeZone:
+          description: "Time zone for the cron programming, for example \"Europe/Madrid\"\
+            . For more information <a href=\"https://en.wikipedia.org/wiki/List_of_tz_database_time_zones\"\
+            \ target=\"_blank\">see</a>."
+          type: string
+    EventData:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+    HttpRecipient:
+      description: Recipient definition that executes a http request on a given url
+        and sends the configured "payload" as the body.
+      required:
+      - url
+      - method
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Recipient'
+      properties:
+        url:
+          description: Url of the recipient that will receive the request.
+          type: string
+        method:
+          description: Http method to use for the request.
+          default: POST
+          enum:
+          - POST
+          - GET
+          - HEAD
+          - PUT
+          - DELETE
+          - PATCH
+          - OPTIONS
+          type: string
+        headers:
+          description: Http headers to send with the request.
+          type: object
+          additionalProperties:
+            type: string
+        queryParams:
+          description: Http query parameters to send with the request.
+          type: object
+          additionalProperties:
+            type: string
+        payload:
+          $ref: '#/components/schemas/HttpRecipientPayloadData'
+    HttpRecipientBinaryPayloadData:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/HttpRecipientPayloadData1'
+      properties:
+        data:
+          format: binary
+          type: string
+    HttpRecipientPayloadData:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          binary: '#/components/schemas/HttpRecipientBinaryPayloadData'
+          string: '#/components/schemas/HttpRecipientStringPayloadData'
+    HttpRecipientPayloadData1:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          binary: '#/components/schemas/HttpRecipientBinaryPayloadData'
+          string: '#/components/schemas/HttpRecipientStringPayloadData'
+    HttpRecipientStringPayloadData:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/HttpRecipientPayloadData1'
+      properties:
+        data:
+          type: string
+    Job:
+      description: Defines a job that can be managed by the jobs service.
+      required:
+      - schedule
+      - retry
+      - recipient
+      type: object
+      properties:
+        id:
+          description: "The unique identifier of the job in the system, this value\
+            \ is set by the jobs service."
+          type: string
+        correlationId:
+          description: Logical user provided identifier of the job in the system.
+          type: string
+        state:
+          $ref: '#/components/schemas/State'
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+        retry:
+          $ref: '#/components/schemas/Retry'
+        recipient:
+          $ref: '#/components/schemas/Recipient'
+    JobLookupId:
+      description: Logical identifier for executing job queries.
+      type: object
+      properties:
+        id:
+          type: string
+        correlationId:
+          type: string
+    KafkaRecipient:
+      description: Recipient definition that delivers a kafka message that contains
+        the configured "payload".
+      required:
+      - bootstrapServers
+      - topicName
+      - payload
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Recipient'
+      properties:
+        bootstrapServers:
+          description: A comma-separated list of host:port to use to establish the
+            connection to the kafka cluster.
+          type: string
+        topicName:
+          description: Topic name for the message delivery.
+          type: string
+        headers:
+          description: Headers to send with the kafka message.
+          type: object
+          additionalProperties:
+            type: string
+        payload:
+          $ref: '#/components/schemas/KafkaRecipientPayloadData'
+    KafkaRecipientBinaryPayloadData:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/KafkaRecipientPayloadData1'
+      properties:
+        data:
+          format: binary
+          type: string
+    KafkaRecipientPayloadData:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          binary: '#/components/schemas/KafkaRecipientBinaryPayloadData'
+          string: '#/components/schemas/KafkaRecipientStringPayloadData'
+    KafkaRecipientPayloadData1:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          binary: '#/components/schemas/KafkaRecipientBinaryPayloadData'
+          string: '#/components/schemas/KafkaRecipientStringPayloadData'
+    KafkaRecipientStringPayloadData:
+      allOf:
+      - type: object
+        properties:
+          data:
+            type: string
+    Retry:
+      description: The retry configuration establishes the number of times a failing
+        job execution must be retried before it’s considered as FAILED.
+      type: object
+      properties:
+        maxRetries:
+          format: int32
+          description: Number of retries to execute in case of failures.
+          default: 3
+          type: integer
+        delay:
+          format: int64
+          description: Time delay between the retries.
+          default: 0
+          type: integer
+        delayUnit:
+          $ref: '#/components/schemas/TemporalUnit'
+        maxDuration:
+          format: int64
+          description: Maximum amount of time to continue retrying if no successful
+            execution was produced.
+          default: 180000
+          type: integer
+        durationUnit:
+          $ref: '#/components/schemas/TemporalUnit'
+    SinkRecipient:
+      description: Recipient definition that delivers a cloud event to a knative sink.
+      required:
+      - sinkUrl
+      - contentMode
+      - payload
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Recipient'
+      properties:
+        sinkUrl:
+          description: Url of the knative sink that will receive the cloud event.
+          type: string
+        contentMode:
+          $ref: '#/components/schemas/ContentMode'
+        payload:
+          $ref: '#/components/schemas/SinkRecipientPayloadData'
+    SinkRecipientPayloadData:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/EventData'
+    State:
+      description: Available states for a Job.
+      enum:
+      - TBD1
+      - TBD2
+      - TBD3
+      type: string
+    TemporalUnit:
+      enum:
+      - MILLIS
+      - SECONDS
+      - MINUTES
+      - HOURS
+      - DAYS
+      type: string
+    TimerSchedule:
+      description: Timer schedules establishes that a job must be executed at a given
+        date time and can be repeated a configurable number of times.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Schedule'
+      properties:
+        startTime:
+          description: Initial fire time for the job in the ISO-8601 standard.
+          type: string
+          example: 2023-01-30T12:01:15+01:00
+        repeatCount:
+          format: int32
+          description: Number of times that the job execution must be repeated.
+          default: 0
+          type: integer
+        delay:
+          format: int64
+          description: Time delay between executions.
+          default: 0
+          type: integer
+        delayUnit:
+          $ref: '#/components/schemas/TemporalUnit'

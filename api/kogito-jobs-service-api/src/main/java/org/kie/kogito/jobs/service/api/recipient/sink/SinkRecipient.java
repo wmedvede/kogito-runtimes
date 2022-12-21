@@ -16,8 +16,8 @@
 
 package org.kie.kogito.jobs.service.api.recipient.sink;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.kie.kogito.jobs.service.api.PayloadData;
 import org.kie.kogito.jobs.service.api.Recipient;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -30,7 +30,7 @@ import static org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipient.SINK_
         allOf = { Recipient.class },
         requiredProperties = { SINK_URL_PROPERTY, CONTENT_MODE_PROPERTY, PAYLOAD_PROPERTY })
 @JsonPropertyOrder({ SINK_URL_PROPERTY, CONTENT_MODE_PROPERTY, PAYLOAD_PROPERTY })
-public class SinkRecipient extends Recipient {
+public class SinkRecipient extends Recipient<SinkRecipientPayloadData> {
 
     static final String SINK_URL_PROPERTY = "sinkUrl";
     static final String CONTENT_MODE_PROPERTY = "contentMode";
@@ -40,12 +40,23 @@ public class SinkRecipient extends Recipient {
         STRUCTURED
     }
 
+    @JsonProperty("payload")
+    SinkRecipientPayloadData payload;
     @Schema(description = "Url of the knative sink that will receive the cloud event.")
     private String sinkUrl;
     private ContentMode contentMode = ContentMode.BINARY;
 
     public SinkRecipient() {
         // marshalling constructor.
+    }
+
+    @Override
+    public SinkRecipientPayloadData getPayload() {
+        return payload;
+    }
+
+    public void setPayload(SinkRecipientPayloadData payload) {
+        this.payload = payload;
     }
 
     public String getSinkUrl() {
@@ -67,8 +78,9 @@ public class SinkRecipient extends Recipient {
     @Override
     public String toString() {
         return "SinkRecipient{" +
-                "sinkUrl='" + sinkUrl + '\'' +
-                ", contentMode='" + contentMode + '\'' +
+                "payload=" + payload +
+                ", sinkUrl='" + sinkUrl + '\'' +
+                ", contentMode=" + contentMode +
                 "} " + super.toString();
     }
 
@@ -84,7 +96,7 @@ public class SinkRecipient extends Recipient {
             this.recipient = recipient;
         }
 
-        public Builder payload(PayloadData<?> payload) {
+        public Builder payload(SinkRecipientPayloadData payload) {
             recipient.setPayload(payload);
             return this;
         }

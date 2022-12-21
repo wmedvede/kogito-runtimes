@@ -26,7 +26,7 @@ import org.kie.kogito.jobs.service.api.event.JobCloudEvent;
 import org.kie.kogito.jobs.service.api.event.serialization.SpecVersionDeserializer;
 import org.kie.kogito.jobs.service.api.event.serialization.SpecVersionSerializer;
 import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient;
-import org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipient;
+// import org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipient;
 import org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipient;
 import org.kie.kogito.jobs.service.api.schedule.cron.CronSchedule;
 import org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule;
@@ -61,7 +61,7 @@ class KogitoAddOnJobsMessagingProcessor extends RequireCapabilityKogitoAddOnProc
                 JobLookupId.class.getName(),
                 Recipient.class.getName(),
                 HttpRecipient.class.getName(),
-                KafkaRecipient.class.getName(),
+                // KafkaRecipient.class.getName(),
                 SinkRecipient.class.getName(),
                 Schedule.class.getName(),
                 TimerSchedule.class.getName(),

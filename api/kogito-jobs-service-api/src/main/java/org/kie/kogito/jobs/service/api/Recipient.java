@@ -29,31 +29,12 @@ import static org.kie.kogito.jobs.service.api.Recipient.TYPE_PROPERTY;
         requiredProperties = { TYPE_PROPERTY },
         description = "Generic definition for a Recipient, users must provide instances of subclasses of this schema to create a job.")
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = TYPE_PROPERTY)
-public abstract class Recipient {
+public abstract class Recipient<T extends PayloadData> implements HasPayload<T> {
 
     static final String TYPE_PROPERTY = "type";
     public static final String PAYLOAD_PROPERTY = "payload";
 
-    // Avoid wildcards due to OpenApi-yml document generation issue that produces duplicated schemas PayloadData and PayloadDataObject.
-    @SuppressWarnings("rawtypes")
-    protected PayloadData payload;
-
     protected Recipient() {
         // marshalling constructor.
-    }
-
-    public PayloadData getPayload() {
-        return payload;
-    }
-
-    public void setPayload(PayloadData payload) {
-        this.payload = payload;
-    }
-
-    @Override
-    public String toString() {
-        return "Recipient{" +
-                "payload=" + payload +
-                '}';
     }
 }

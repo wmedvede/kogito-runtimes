@@ -291,7 +291,7 @@ public abstract class AbstractReactiveMessagingJobsServiceTest<T extends Abstrac
                         .delay(EXPIRATION_TIME.repeatInterval())
                         .delayUnit(TemporalUnit.MILLIS)
                         .build())
-                .recipient(HttpRecipient.builder()
+                .recipient(HttpRecipient.builder().forStringPayload()
                         .url(CALLBACK_ENDPOINT)
                         .header("kogito-processInstanceId", PROCESS_INSTANCE_ID)
                         .header("kogito-rootProcessInstanceId", ROOT_PROCESS_INSTANCE_ID)

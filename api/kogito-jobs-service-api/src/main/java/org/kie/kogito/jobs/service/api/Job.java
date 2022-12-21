@@ -48,7 +48,7 @@ public class Job {
     private State state;
     private Schedule schedule;
     private Retry retry;
-    private Recipient recipient;
+    private Recipient<?> recipient;
 
     public Job() {
         // marshalling constructor.

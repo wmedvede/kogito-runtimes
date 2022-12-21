@@ -1,0 +1,18 @@
+{
+  "id": null,
+  "correlationId": null,
+  "state": null,
+  "schedule": null,
+  "retry": null,
+  "recipient": {
+    "type": "sink",
+    "sinkUrl": "http://sink-url.com",
+    "contentMode": "BINARY",
+    "payload": {
+      "data": {
+        "name": "Michael",
+        "surname": "Jackson"
+      }
+    }
+  }
+}

@@ -14,10 +14,32 @@
  * limitations under the License.
  */
 
-package org.kie.kogito.jobs.service.api;
+package org.kie.kogito.jobs.service.api.old;
 
-public abstract class PayloadData<T> implements HasData<T> {
-    protected PayloadData() {
+import org.kie.kogito.jobs.service.api.PayloadData;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+//@Schema(allOf = { PayloadData.class })
+public class BinaryPayloadData extends PayloadData<byte[]> {
+
+    @JsonProperty("data")
+    private byte[] dataBytes;
+
+    private BinaryPayloadData() {
         // Marshalling constructor.
+    }
+
+    private BinaryPayloadData(byte[] data) {
+        this.dataBytes = data;
+    }
+
+    @Override
+    public byte[] getData() {
+        return dataBytes;
+    }
+
+    public static BinaryPayloadData from(byte[] data) {
+        return new BinaryPayloadData(data);
     }
 }

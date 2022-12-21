@@ -14,16 +14,31 @@
  * limitations under the License.
  */
 
-package org.kie.kogito.jobs.service.api;
+package org.kie.kogito.jobs.service.api.old;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.kie.kogito.jobs.service.api.PayloadData;
 
-public interface HasData<T> {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    @JsonIgnore
-    T getData();
+//@Schema(allOf = { PayloadData.class })
+public class StringPayloadData extends PayloadData<String> {
 
-    default byte[] asBytes() {
-        return null;
+    @JsonProperty("data")
+    private String dataString;
+
+    public StringPayloadData() {
+        // Marshalling constructor.
+    }
+
+    private StringPayloadData(String data) {
+        this.dataString = data;
+    }
+
+    public String getData() {
+        return dataString;
+    }
+
+    public static StringPayloadData from(String data) {
+        return new StringPayloadData(data);
     }
 }

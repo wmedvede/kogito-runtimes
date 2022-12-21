@@ -14,32 +14,28 @@
  * limitations under the License.
  */
 
-package org.kie.kogito.jobs.service.api;
+package org.kie.kogito.jobs.service.api.recipient.kafka;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Schema(allOf = { PayloadData.class })
-public class BinaryPayloadData extends PayloadData<byte[]> {
+@Schema(allOf = { KafkaRecipientPayloadData.class })
+public class KafkaRecipientBinaryPayloadData extends KafkaRecipientPayloadData<byte[]> {
 
     @JsonProperty("data")
     private byte[] dataBytes;
 
-    private BinaryPayloadData() {
+    protected KafkaRecipientBinaryPayloadData() {
         // Marshalling constructor.
     }
 
-    private BinaryPayloadData(byte[] data) {
+    protected KafkaRecipientBinaryPayloadData(byte[] data) {
         this.dataBytes = data;
     }
 
     @Override
     public byte[] getData() {
         return dataBytes;
-    }
-
-    public static BinaryPayloadData from(byte[] data) {
-        return new BinaryPayloadData(data);
     }
 }

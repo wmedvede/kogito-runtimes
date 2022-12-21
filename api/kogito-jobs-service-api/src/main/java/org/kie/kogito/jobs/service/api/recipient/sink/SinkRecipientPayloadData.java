@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package org.kie.kogito.jobs.service.api;
+package org.kie.kogito.jobs.service.api.recipient.sink;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.kie.kogito.jobs.service.api.PayloadData;
 
-public interface HasData<T> {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    @JsonIgnore
-    T getData();
+public class SinkRecipientPayloadData extends PayloadData<EventData> {
 
-    default byte[] asBytes() {
-        return null;
+    @JsonProperty("data")
+    private EventData eventData;
+
+    protected SinkRecipientPayloadData() {
+        // Marshalling constructor.
+    }
+
+    public SinkRecipientPayloadData(EventData eventData) {
+        this.eventData = eventData;
+    }
+
+    @Override
+    public EventData getData() {
+        return eventData;
     }
 }

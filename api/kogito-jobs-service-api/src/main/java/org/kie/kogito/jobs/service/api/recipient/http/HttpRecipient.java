@@ -20,22 +20,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.kie.kogito.jobs.service.api.PayloadData;
 import org.kie.kogito.jobs.service.api.Recipient;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import static org.kie.kogito.jobs.service.api.Recipient.PAYLOAD_PROPERTY;
-import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.HEADERS_PROPERTY;
-import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.METHOD_PROPERTY;
-import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.QUERY_PARAMS_PROPERTY;
-import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.URL_PROPERTY;
 
 @Schema(description = "Recipient definition that executes a http request on a given url and sends the configured \"payload\" as the body.",
         allOf = { Recipient.class },
-        requiredProperties = { URL_PROPERTY, METHOD_PROPERTY })
-@JsonPropertyOrder({ URL_PROPERTY, METHOD_PROPERTY, HEADERS_PROPERTY, QUERY_PARAMS_PROPERTY, PAYLOAD_PROPERTY })
-public class HttpRecipient extends Recipient {
+        requiredProperties = { HttpRecipient.URL_PROPERTY, HttpRecipient.METHOD_PROPERTY })
+@JsonPropertyOrder({ HttpRecipient.URL_PROPERTY, HttpRecipient.METHOD_PROPERTY, HttpRecipient.HEADERS_PROPERTY, HttpRecipient.QUERY_PARAMS_PROPERTY, PAYLOAD_PROPERTY })
+public class HttpRecipient<T extends HttpRecipientPayloadData<?>> extends Recipient<T> {
 
     static final String URL_PROPERTY = "url";
     static final String METHOD_PROPERTY = "method";
@@ -52,11 +48,22 @@ public class HttpRecipient extends Recipient {
     private Map<String, String> headers;
     @Schema(description = "Http query parameters to send with the request.")
     private Map<String, String> queryParams;
+    @JsonProperty("payload")
+    T payload;
 
     public HttpRecipient() {
         // marshalling constructor.
         this.headers = new HashMap<>();
         this.queryParams = new HashMap<>();
+    }
+
+    @Override
+    public T getPayload() {
+        return payload;
+    }
+
+    public void setPayload(T payload) {
+        this.payload = payload;
     }
 
     public String getUrl() {
@@ -83,7 +90,7 @@ public class HttpRecipient extends Recipient {
         this.headers = headers != null ? headers : new HashMap<>();
     }
 
-    public HttpRecipient addHeader(String name, String value) {
+    public HttpRecipient<T> addHeader(String name, String value) {
         headers.put(name, value);
         return this;
     }
@@ -100,7 +107,7 @@ public class HttpRecipient extends Recipient {
         this.queryParams = queryParams != null ? queryParams : new HashMap<>();
     }
 
-    public HttpRecipient addQueryParam(String name, String value) {
+    public HttpRecipient<T> addQueryParam(String name, String value) {
         queryParams.put(name, value);
         return this;
     }
@@ -116,47 +123,63 @@ public class HttpRecipient extends Recipient {
                 ", method='" + method + '\'' +
                 ", headers=" + headers +
                 ", queryParams=" + queryParams +
+                ", payload=" + payload +
                 "} " + super.toString();
     }
 
-    public static Builder builder() {
-        return new Builder(new HttpRecipient());
+    public static BuilderSelector builder() {
+        return new BuilderSelector();
     }
 
-    public static class Builder {
+    public static class BuilderSelector {
 
-        private final HttpRecipient recipient;
+        private BuilderSelector() {
 
-        private Builder(HttpRecipient recipient) {
+        }
+
+        public Builder<HttpRecipientStringPayloadData> forStringPayload() {
+            return new HttpRecipient.Builder<>(new HttpRecipient<>());
+
+        }
+
+        public Builder<HttpRecipientBinaryPayloadData> forBinaryPayload() {
+            return new HttpRecipient.Builder<>(new HttpRecipient<>());
+        }
+    }
+
+    public static class Builder<P extends HttpRecipientPayloadData<?>> {
+        private final HttpRecipient<P> recipient;
+
+        private Builder(HttpRecipient<P> recipient) {
             this.recipient = recipient;
         }
 
-        public Builder payload(PayloadData<?> payload) {
+        public Builder<P> payload(P payload) {
             recipient.setPayload(payload);
             return this;
         }
 
-        public Builder url(String url) {
+        public Builder<P> url(String url) {
             recipient.setUrl(url);
             return this;
         }
 
-        public Builder method(String method) {
+        public Builder<P> method(String method) {
             recipient.setMethod(method);
             return this;
         }
 
-        public Builder header(String name, String value) {
+        public Builder<P> header(String name, String value) {
             recipient.addHeader(name, value);
             return this;
         }
 
-        public Builder queryParam(String name, String value) {
+        public Builder<P> queryParam(String name, String value) {
             recipient.addQueryParam(name, value);
             return this;
         }
 
-        public HttpRecipient build() {
+        public HttpRecipient<P> build() {
             return recipient;
         }
     }

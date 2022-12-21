@@ -14,31 +14,27 @@
  * limitations under the License.
  */
 
-package org.kie.kogito.jobs.service.api;
+package org.kie.kogito.jobs.service.api.recipient.sink;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
+public class EventData {
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+    String name;
 
-@Schema(allOf = { PayloadData.class })
-public class StringPayloadData extends PayloadData<String> {
+    String surname;
 
-    @JsonProperty("data")
-    private String dataString;
-
-    public StringPayloadData() {
-        // Marshalling constructor.
+    public String getName() {
+        return name;
     }
 
-    private StringPayloadData(String data) {
-        this.dataString = data;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getData() {
-        return dataString;
+    public String getSurname() {
+        return surname;
     }
 
-    public static StringPayloadData from(String data) {
-        return new StringPayloadData(data);
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 }
