@@ -55,7 +55,7 @@ public class CronSchedule extends Schedule {
     }
 
     public CronSchedule() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 
     @Override

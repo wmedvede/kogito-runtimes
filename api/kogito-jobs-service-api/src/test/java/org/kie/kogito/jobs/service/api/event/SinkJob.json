@@ -10,8 +10,11 @@
     "contentMode": "BINARY",
     "payload": {
       "data": {
-        "name": "Michael",
-        "surname": "Jackson"
+        "specversion": "1.0",
+        "id": "c038e2c3-4665-4ed3-9c24-191be4e7f8d6",
+        "source": "http:/example.com",
+        "type": "test.event",
+        "data": 你好你好嗎用中文
       }
     }
   }

@@ -47,10 +47,10 @@ public class KafkaRecipient<T extends KafkaRecipientPayloadData<?>> extends Reci
     @Schema(description = "Headers to send with the kafka message.")
     private Map<String, String> headers;
     @JsonProperty("payload")
-    T payload;
+    private T payload;
 
     public KafkaRecipient() {
-        // marshalling constructor.
+        // Marshalling constructor.
         this.headers = new HashMap<>();
     }
 

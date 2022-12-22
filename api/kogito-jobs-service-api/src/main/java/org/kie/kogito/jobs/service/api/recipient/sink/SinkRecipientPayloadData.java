@@ -20,21 +20,27 @@ import org.kie.kogito.jobs.service.api.PayloadData;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SinkRecipientPayloadData extends PayloadData<EventData> {
+import io.cloudevents.CloudEvent;
+
+public class SinkRecipientPayloadData extends PayloadData<CloudEvent> {
 
     @JsonProperty("data")
-    private EventData eventData;
+    private CloudEvent event;
 
-    protected SinkRecipientPayloadData() {
+    public SinkRecipientPayloadData() {
         // Marshalling constructor.
     }
 
-    public SinkRecipientPayloadData(EventData eventData) {
-        this.eventData = eventData;
+    private SinkRecipientPayloadData(CloudEvent event) {
+        this.event = event;
     }
 
     @Override
-    public EventData getData() {
-        return eventData;
+    public CloudEvent getData() {
+        return event;
+    }
+
+    public static SinkRecipientPayloadData from(CloudEvent event) {
+        return new SinkRecipientPayloadData(event);
     }
 }

@@ -26,7 +26,7 @@ public class KafkaRecipientStringPayloadData extends KafkaRecipientPayloadData<S
     @JsonProperty("data")
     private String dataString;
 
-    protected KafkaRecipientStringPayloadData() {
+    public KafkaRecipientStringPayloadData() {
         // Marshalling constructor.
     }
 
@@ -34,15 +34,12 @@ public class KafkaRecipientStringPayloadData extends KafkaRecipientPayloadData<S
         this.dataString = data;
     }
 
+    @Override
     public String getData() {
         return dataString;
     }
 
     public static KafkaRecipientStringPayloadData from(String data) {
         return new KafkaRecipientStringPayloadData(data);
-    }
-
-    public static KafkaRecipientStringPayloadData fromNull() {
-        return new KafkaRecipientStringPayloadData(null);
     }
 }

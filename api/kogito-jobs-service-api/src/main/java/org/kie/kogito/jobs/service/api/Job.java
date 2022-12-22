@@ -20,7 +20,12 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import static org.kie.kogito.jobs.service.api.Job.*;
+import static org.kie.kogito.jobs.service.api.Job.CORRELATION_ID_PROPERTY;
+import static org.kie.kogito.jobs.service.api.Job.ID_PROPERTY;
+import static org.kie.kogito.jobs.service.api.Job.RECIPIENT_PROPERTY;
+import static org.kie.kogito.jobs.service.api.Job.RETRY_PROPERTY;
+import static org.kie.kogito.jobs.service.api.Job.SCHEDULE_PROPERTY;
+import static org.kie.kogito.jobs.service.api.Job.STATE_PROPERTY;
 
 @Schema(description = "Defines a job that can be managed by the jobs service.",
         requiredProperties = { SCHEDULE_PROPERTY, RETRY_PROPERTY, RECIPIENT_PROPERTY })
@@ -51,7 +56,7 @@ public class Job {
     private Recipient<?> recipient;
 
     public Job() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 
     public String getId() {
@@ -151,7 +156,7 @@ public class Job {
             return this;
         }
 
-        public Builder recipient(Recipient recipient) {
+        public Builder recipient(Recipient<?> recipient) {
             job.setRecipient(recipient);
             return this;
         }

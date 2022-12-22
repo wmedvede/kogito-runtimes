@@ -26,16 +26,20 @@ public class KafkaRecipientBinaryPayloadData extends KafkaRecipientPayloadData<b
     @JsonProperty("data")
     private byte[] dataBytes;
 
-    protected KafkaRecipientBinaryPayloadData() {
+    public KafkaRecipientBinaryPayloadData() {
         // Marshalling constructor.
     }
 
-    protected KafkaRecipientBinaryPayloadData(byte[] data) {
+    private KafkaRecipientBinaryPayloadData(byte[] data) {
         this.dataBytes = data;
     }
 
     @Override
     public byte[] getData() {
         return dataBytes;
+    }
+
+    public static KafkaRecipientBinaryPayloadData from(byte[] data) {
+        return new KafkaRecipientBinaryPayloadData(data);
     }
 }

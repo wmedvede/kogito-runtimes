@@ -20,17 +20,17 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Schema(name = "HttpRecipientBinaryPayloadData", allOf = { HttpRecipientPayloadData.class })
+@Schema(allOf = { HttpRecipientPayloadData.class })
 public class HttpRecipientBinaryPayloadData extends HttpRecipientPayloadData<byte[]> {
 
     @JsonProperty("data")
     private byte[] dataBytes;
 
-    protected HttpRecipientBinaryPayloadData() {
+    public HttpRecipientBinaryPayloadData() {
         // Marshalling constructor.
     }
 
-    protected HttpRecipientBinaryPayloadData(byte[] data) {
+    private HttpRecipientBinaryPayloadData(byte[] data) {
         this.dataBytes = data;
     }
 

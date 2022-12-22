@@ -35,6 +35,6 @@ public abstract class Recipient<T extends PayloadData> implements HasPayload<T> 
     public static final String PAYLOAD_PROPERTY = "payload";
 
     protected Recipient() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 }

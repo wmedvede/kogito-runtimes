@@ -22,8 +22,4 @@ public interface HasData<T> {
 
     @JsonIgnore
     T getData();
-
-    default byte[] asBytes() {
-        return null;
-    }
 }

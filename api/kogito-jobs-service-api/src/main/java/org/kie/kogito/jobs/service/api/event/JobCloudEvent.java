@@ -65,7 +65,7 @@ public abstract class JobCloudEvent<T> implements CloudEventAttributes {
     private T data;
 
     protected JobCloudEvent() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 
     @Override

@@ -34,6 +34,6 @@ public abstract class Schedule {
     static final String TYPE_PROPERTY = "type";
 
     protected Schedule() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 }

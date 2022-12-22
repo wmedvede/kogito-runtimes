@@ -25,11 +25,11 @@ import org.kie.kogito.jobs.service.api.PayloadData;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipientPayloadData.*;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipientPayloadData.BINARY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipientPayloadData.STRING;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipientPayloadData.TYPE;
 
-@Schema(
-        name = "HttpRecipientPayloadData",
-        discriminatorProperty = TYPE,
+@Schema(discriminatorProperty = TYPE,
         properties = { @SchemaProperty(name = TYPE, type = SchemaType.STRING) },
         requiredProperties = { TYPE },
         discriminatorMapping = {
@@ -47,4 +47,7 @@ public abstract class HttpRecipientPayloadData<T> extends PayloadData<T> {
     static final String STRING = "string";
     static final String BINARY = "binary";
 
+    protected HttpRecipientPayloadData() {
+        // Marshalling constructor.
+    }
 }

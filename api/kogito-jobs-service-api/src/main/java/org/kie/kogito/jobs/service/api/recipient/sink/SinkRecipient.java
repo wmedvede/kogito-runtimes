@@ -16,10 +16,10 @@
 
 package org.kie.kogito.jobs.service.api.recipient.sink;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.kie.kogito.jobs.service.api.Recipient;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import static org.kie.kogito.jobs.service.api.Recipient.PAYLOAD_PROPERTY;
@@ -40,14 +40,14 @@ public class SinkRecipient extends Recipient<SinkRecipientPayloadData> {
         STRUCTURED
     }
 
-    @JsonProperty("payload")
-    SinkRecipientPayloadData payload;
     @Schema(description = "Url of the knative sink that will receive the cloud event.")
     private String sinkUrl;
     private ContentMode contentMode = ContentMode.BINARY;
+    @JsonProperty("payload")
+    private SinkRecipientPayloadData payload;
 
     public SinkRecipient() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 
     @Override

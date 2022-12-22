@@ -25,7 +25,9 @@ import org.kie.kogito.jobs.service.api.PayloadData;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import static org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipientPayloadData.*;
+import static org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipientPayloadData.BINARY;
+import static org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipientPayloadData.STRING;
+import static org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipientPayloadData.TYPE;
 
 @Schema(
         discriminatorProperty = TYPE,
@@ -46,17 +48,4 @@ public abstract class KafkaRecipientPayloadData<T> extends PayloadData<T> {
     static final String TYPE = "type";
     static final String STRING = "string";
     static final String BINARY = "binary";
-
-    public KafkaRecipientPayloadData() {
-    }
-
-    @Override
-    public T getData() {
-        return null;
-    }
-
-    @Override
-    public byte[] asBytes() {
-        return super.asBytes();
-    }
 }

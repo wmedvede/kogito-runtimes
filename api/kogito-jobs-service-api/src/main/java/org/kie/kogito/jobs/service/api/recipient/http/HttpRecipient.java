@@ -26,11 +26,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import static org.kie.kogito.jobs.service.api.Recipient.PAYLOAD_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.HEADERS_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.METHOD_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.QUERY_PARAMS_PROPERTY;
+import static org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient.URL_PROPERTY;
 
 @Schema(description = "Recipient definition that executes a http request on a given url and sends the configured \"payload\" as the body.",
         allOf = { Recipient.class },
-        requiredProperties = { HttpRecipient.URL_PROPERTY, HttpRecipient.METHOD_PROPERTY })
-@JsonPropertyOrder({ HttpRecipient.URL_PROPERTY, HttpRecipient.METHOD_PROPERTY, HttpRecipient.HEADERS_PROPERTY, HttpRecipient.QUERY_PARAMS_PROPERTY, PAYLOAD_PROPERTY })
+        requiredProperties = { URL_PROPERTY, METHOD_PROPERTY })
+@JsonPropertyOrder({ URL_PROPERTY, METHOD_PROPERTY, HEADERS_PROPERTY, QUERY_PARAMS_PROPERTY, PAYLOAD_PROPERTY })
 public class HttpRecipient<T extends HttpRecipientPayloadData<?>> extends Recipient<T> {
 
     static final String URL_PROPERTY = "url";
@@ -49,10 +53,10 @@ public class HttpRecipient<T extends HttpRecipientPayloadData<?>> extends Recipi
     @Schema(description = "Http query parameters to send with the request.")
     private Map<String, String> queryParams;
     @JsonProperty("payload")
-    T payload;
+    private T payload;
 
     public HttpRecipient() {
-        // marshalling constructor.
+        // Marshalling constructor.
         this.headers = new HashMap<>();
         this.queryParams = new HashMap<>();
     }

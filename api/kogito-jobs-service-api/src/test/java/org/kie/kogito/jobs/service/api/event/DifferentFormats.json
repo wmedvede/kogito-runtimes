@@ -1,0 +1,85 @@
+{
+  "event_examples": [
+    {
+      "description": [
+        "Acá NO pusimos datacontenttype, asi que asumio application/json, y usamos un BytesCloudEventData con bytes arbitrarios",
+        "asi que lo que hizo fue asumir que ahi venia un json (object, null, true, false, number, array)",
+        "y lo puso directamente como contenido del data, dando como resultado un json NO valido"
+      ],
+      "specversion": "1.0",
+      "id": "c038e2c3-4665-4ed3-9c24-191be4e7f8d6",
+      "source": "http:/example.com",
+      "type": "test.event",
+      "data": 你好你好嗎用中文
+    },
+    {
+      "description": [
+        "Acá NO pusimos datacontenttype, asi que asumio application/json, y usamos un BytesCloudEventData con el valor true",
+        "asi que lo que hizo fue asumir que ahi venia un json (object, null, true, false, number, array)",
+        "y lo puso directamente como contenido del data, dando como resultado un json valido!"
+      ],
+      "specversion": "1.0",
+      "id": "2dc384c1-47c2-4d63-b82b-4f17e94ae037",
+      "source": "http:/example.com",
+      "type": "test.event",
+      "data": true
+    },
+    {
+      "description": [
+        "Acá NO pusimos datacontenttype, asi que asumio json, y usamos un JsonCloudEventData con un json valido",
+        "asi que lo que hizo fue asumir que ahi venia un json (object, null, true, false, number, array)",
+        "y lo puso directamente como contenido del data, dando como resultado un json valido!"
+      ],
+      "specversion": "1.0",
+      "id": "a5f2c11e-7b2b-46d8-9d2f-005962adb685",
+      "source": "http:/example.com",
+      "type": "test.event",
+      "data": {
+        "name": "Michael",
+        "surname": "Jackson"
+      }
+    },
+    {
+      "description": [
+        "Acá pusimos datacontenttype=application/octet usamos un BytesCloudEventData con bytes arbitrarios",
+        "luego al ser un BytesCloudEvent data, para mandar los bytes tiene que codificar en base64 y para eso",
+        "y ademas usar el campo data_base64 para saber del otro lado como decodificar el evento."
+      ],
+      "specversion": "1.0",
+      "id": "5e081f2c-a949-466d-9bfc-0aad66eadc5c",
+      "source": "http:/example.com",
+      "type": "test.event",
+      "datacontenttype": "application/octet",
+      "data_base64": "dHJ1ZQ=="
+    },
+    {
+      "description": [
+        "Acá pusimos datacontenttype=application/octet usamos un JsonCloudEvent data con un json valido",
+        "luego al ser un JsonCloudEvent data, para mandar los bytes no necesito codificar en base64",
+        "y uso el campo data directamente.",
+        "peeeero al decodificar: da este error: Wrong type OBJECT for attribute data, expecting STRING.",
+        " Because content type is not a json, only a string is accepted as data",
+        " o sea que al parecer, cuando usamos content type NO application/json ",
+        " solo se admiten estas dos posibilidades",
+        " 1) se manda el campo data con un string, y por lo tanto se puede saber al decodificar que ",
+        "    dado que el contenttpe NO es application/json, se asume que alli viene un string y listo",
+        " 2) se manda el campo data_base64 con los datos codificados en base46 y al venir se campo se sabe que hay q "
+        "    decodificar al leer puesto que el contenttype NO es application/json"
+      ],
+      "specversion": "1.0",
+      "id": "6d67b57c-d540-4dc0-8777-f4cc443f058d",
+      "source": "http:/example.com",
+      "type": "test.event",
+      "datacontenttype": "application/octet",
+      "data": {
+        "name": "Michael",
+        "surname": "Jackson"
+      }
+    }
+  ]
+}
+
+
+
+
+

@@ -34,7 +34,7 @@ public class JobLookupId {
     private String correlationId;
 
     private JobLookupId() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 
     private JobLookupId(String id, String correlationId) {

@@ -1,23 +1,23 @@
 {
-  "id": null,
-  "correlationId": null,
-  "state": null,
-  "schedule": null,
-  "retry": null,
-  "recipient": {
-    "type": "http",
-    "url": "http://examples.com",
-    "method": "POST",
-    "headers": {
-      "header2": "header1Value",
-      "header1": "header1Value"
-    },
-    "queryParams": {
-      "param1": "param1value"
-    },
-    "payload": {
-      "type": "binary",
-      "data": "5L2g5aW95L2g5aW95ZeO55So5Lit5paH"
+    "id" : null,
+    "correlationId" : null,
+    "state" : null,
+    "schedule" : null,
+    "retry" : null,
+    "recipient" : {
+        "type" : "http",
+        "url" : "http://examples.com",
+        "method" : "POST",
+        "headers" : {
+            "header2" : "header1Value",
+            "header1" : "header1Value"
+        },
+        "queryParams" : {
+            "param1" : "param1value"
+        },
+        "payload" : {
+            "type" : "binary",
+            "data" : "5L2g5aW95L2g5aW95ZeO55So5Lit5paH"
+        }
     }
-  }
 }

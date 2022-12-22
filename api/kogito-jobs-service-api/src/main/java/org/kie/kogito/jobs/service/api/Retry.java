@@ -46,7 +46,7 @@ public class Retry {
     private TemporalUnit durationUnit = TemporalUnit.MILLIS;
 
     public Retry() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 
     public Integer getMaxRetries() {

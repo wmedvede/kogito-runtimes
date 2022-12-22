@@ -26,7 +26,7 @@ public class HttpRecipientStringPayloadData extends HttpRecipientPayloadData<Str
     @JsonProperty("data")
     private String dataString;
 
-    protected HttpRecipientStringPayloadData() {
+    public HttpRecipientStringPayloadData() {
         // Marshalling constructor.
     }
 

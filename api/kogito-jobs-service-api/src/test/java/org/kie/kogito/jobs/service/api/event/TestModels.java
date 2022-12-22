@@ -16,6 +16,10 @@
 
 package org.kie.kogito.jobs.service.api.event;
 
+import java.net.URI;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.kogito.jobs.service.api.*;
 import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient;
@@ -23,24 +27,49 @@ import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipientBinaryPayload
 import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipientStringPayloadData;
 import org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipient;
 import org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipientStringPayloadData;
+import org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipient;
+import org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipientPayloadData;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
-import org.kie.kogito.jobs.service.api.recipient.sink.EventData;
-import org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipient;
-import org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipientPayloadData;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.cloudevents.CloudEvent;
+import io.cloudevents.core.builder.CloudEventBuilder;
+import io.cloudevents.core.data.BytesCloudEventData;
+import io.cloudevents.core.format.EventFormat;
+import io.cloudevents.core.provider.EventFormatProvider;
+import io.cloudevents.jackson.JsonFormat;
 
 public class TestModels {
 
+    private EventFormat eventFormat;
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        eventFormat = EventFormatProvider.getInstance().resolveFormat("application/cloudevents+json");
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModules(JsonFormat.getCloudEventJacksonModule());
+        registerDescriptors(objectMapper);
+    }
+
     @Test
     void createHttpRecipientWithStringPayloadData() throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ObjectNode jsonNode = objectMapper.createObjectNode();
+        jsonNode.put("name", "Tioagop");
+        jsonNode.put("age", 15);
+        String serialized = objectMapper.writeValueAsString(jsonNode);
 
         HttpRecipient<HttpRecipientStringPayloadData> recipient = HttpRecipient.builder()
                 .forStringPayload()
                 .url("http://examples.com")
                 .method("POST")
-                .payload(HttpRecipientStringPayloadData.from("ABC"))
+                .payload(HttpRecipientStringPayloadData.from(serialized))
                 .url("http://examples.com")
                 .queryParam("param1", "param1value")
                 .header("header1", "header1Value")
@@ -51,7 +80,6 @@ public class TestModels {
                 .recipient(recipient)
                 .build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
         registerDescriptors(objectMapper);
 
         String json = objectMapper.writeValueAsString(recipient);
@@ -106,25 +134,50 @@ public class TestModels {
     @Test
     void createSinkRecipient() throws Exception {
 
-        EventData eventData = new EventData();
-        eventData.setName("Michael");
-        eventData.setSurname("Jackson");
+        /*
+         * 
+         * When we work with json format
+         * 
+         * 1) if datacontenttype == null -> It's assumed as datacontenttype="application/json".
+         * 2) if datacontenttype="application/json". what we have in the data is assumed to be a valid json (
+         * 
+         * 
+         * 
+         * 
+         * 
+         */
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("name", "Michael");
+        objectNode.put("surname", "Jackson");
+
+        CloudEvent event = CloudEventBuilder.v1()
+                .withId(UUID.randomUUID().toString())
+                //.withDataContentType("application/xml")
+                .withDataContentType("application/octet")
+                .withType("test.event")
+                .withSource(URI.create("http:/example.com"))
+                .withData(BytesCloudEventData.wrap("true".getBytes()))
+                //.withData(JsonCloudEventData.wrap(objectNode))
+                //.withData("hello workd".getBytes())
+                //.withData(StringCloudEventData.wrap(objectNode))
+                .build();
 
         SinkRecipient recipient = SinkRecipient.builder()
                 .sinkUrl("http://sink-url.com")
                 .contentMode(SinkRecipient.ContentMode.BINARY)
-                .payload(new SinkRecipientPayloadData(eventData))
+                .payload(SinkRecipientPayloadData.from(event))
                 .build();
+
         Job job = Job.builder()
                 .recipient(recipient)
                 .build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        registerDescriptors(objectMapper);
-
+        String eventJson = new String(eventFormat.serialize(event));
         String json = objectMapper.writeValueAsString(recipient);
         String jobJson = objectMapper.writeValueAsString(job);
 
+        System.out.println("Event json" + eventJson);
         System.out.println("Recipient json" + json);
         System.out.println("Job json" + jobJson);
 

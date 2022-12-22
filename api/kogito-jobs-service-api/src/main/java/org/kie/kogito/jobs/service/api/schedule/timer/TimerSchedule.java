@@ -22,7 +22,10 @@ import org.kie.kogito.jobs.service.api.TemporalUnit;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import static org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule.*;
+import static org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule.DELAY_PROPERTY;
+import static org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule.DELAY_UNIT_PROPERTY;
+import static org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule.REPEAT_COUNT_PROPERTY;
+import static org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule.START_TIME_PROPERTY;
 
 @Schema(description = "Timer schedules establishes that a job must be executed at a given date time and can be repeated a configurable number of times.",
         allOf = { Schedule.class })
@@ -43,7 +46,7 @@ public class TimerSchedule extends Schedule {
     private TemporalUnit delayUnit = TemporalUnit.MILLIS;
 
     public TimerSchedule() {
-        // marshalling constructor.
+        // Marshalling constructor.
     }
 
     public String getStartTime() {
