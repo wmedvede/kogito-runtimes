@@ -19,8 +19,8 @@ import javax.annotation.PostConstruct;
 
 import org.kie.kogito.jobs.ProcessInstanceJobDescription;
 import org.kie.kogito.jobs.ProcessJobDescription;
-import org.kie.kogito.jobs.api.Job;
 import org.kie.kogito.jobs.management.RestJobsService;
+import org.kie.kogito.jobs.service.api.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

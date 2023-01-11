@@ -75,7 +75,7 @@ class VertxJobsServiceTest {
     public void setUp() {
         when(instance.isResolvable()).thenReturn(true);
         when(instance.get()).thenReturn(webClient);
-
+        //TODO
         tested = new VertxJobsService(JOB_SERVICE_URL, CALLBACK_URL, vertx, instance);
         tested.initialize();
     }

@@ -17,6 +17,10 @@
 package org.kie.kogito.jobs.api;
 
 import org.kie.kogito.jobs.ProcessInstanceJobDescription;
+import org.kie.kogito.jobs.service.api.TemporalUnit;
+import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient;
+import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipientStringPayloadData;
+import org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule;
 
 /**
  * Common definitions for add-ons implementations based on the Jobs Service to Runtime rest callback pattern.
@@ -64,6 +68,37 @@ public class JobCallbackResourceDef {
                 .rootProcessId(description.rootProcessId())
                 .rootProcessInstanceId(description.rootProcessInstanceId())
                 .nodeInstanceId(description.nodeInstanceId())
+                .build();
+    }
+
+    public static org.kie.kogito.jobs.service.api.Job buildCallbackPatternJobV2(ProcessInstanceJobDescription description, String callback) {
+        return org.kie.kogito.jobs.service.api.Job.builder()
+                .id(description.id())
+                .correlationId(description.id())
+                .recipient(buildRecipient(description, callback))
+                .schedule(buildSchedule(description))
+                .build();
+    }
+
+    private static HttpRecipient<HttpRecipientStringPayloadData> buildRecipient(ProcessInstanceJobDescription description, String callback) {
+        return HttpRecipient.builder()
+                .forStringPayload()
+                .payload(null)
+                .url(callback)
+                .header("kogito-processInstanceId", description.processInstanceId())
+                .header("kogito-rootProcessInstanceId", description.rootProcessInstanceId())
+                .header("kogito-processId", description.processId())
+                .header("kogito-rootProcessId", description.rootProcessId())
+                .header("kogito-nodeInstanceId", description.nodeInstanceId())
+                .build();
+    }
+
+    private static TimerSchedule buildSchedule(ProcessInstanceJobDescription description) {
+        return TimerSchedule.builder()
+                .startTime(description.expirationTime().get().toOffsetDateTime())
+                .repeatCount(description.expirationTime().repeatLimit())
+                .delay(description.expirationTime().repeatInterval())
+                .delayUnit(TemporalUnit.MILLIS)
                 .build();
     }
 }
