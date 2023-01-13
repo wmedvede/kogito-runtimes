@@ -31,6 +31,12 @@ public class JobCallbackResourceDef {
 
     public static final String PROCESS_INSTANCE_ID = "processInstanceId";
 
+    public static final String ROOT_PROCESS_ID = "rootProcessId";
+
+    public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
+
+    public static final String NODE_INSTANCE_ID = "nodeInstanceId";
+
     public static final String TIMER_ID = "timerId";
 
     public static final String LIMIT = "limit";
@@ -55,23 +61,7 @@ public class JobCallbackResourceDef {
                 .toString();
     }
 
-    public static Job buildCallbackPatternJob(ProcessInstanceJobDescription description, String callback) {
-        return JobBuilder.builder()
-                .id(description.id())
-                .expirationTime(description.expirationTime().get())
-                .repeatInterval(description.expirationTime().repeatInterval())
-                .repeatLimit(description.expirationTime().repeatLimit())
-                .priority(0)
-                .callbackEndpoint(callback)
-                .processId(description.processId())
-                .processInstanceId(description.processInstanceId())
-                .rootProcessId(description.rootProcessId())
-                .rootProcessInstanceId(description.rootProcessInstanceId())
-                .nodeInstanceId(description.nodeInstanceId())
-                .build();
-    }
-
-    public static org.kie.kogito.jobs.service.api.Job buildCallbackPatternJobV2(ProcessInstanceJobDescription description, String callback) {
+    public static org.kie.kogito.jobs.service.api.Job buildCallbackPatternJob(ProcessInstanceJobDescription description, String callback) {
         return org.kie.kogito.jobs.service.api.Job.builder()
                 .id(description.id())
                 .correlationId(description.id())
@@ -83,13 +73,12 @@ public class JobCallbackResourceDef {
     private static HttpRecipient<HttpRecipientStringPayloadData> buildRecipient(ProcessInstanceJobDescription description, String callback) {
         return HttpRecipient.builder()
                 .forStringPayload()
-                .payload(null)
                 .url(callback)
-                .header("kogito-processInstanceId", description.processInstanceId())
-                .header("kogito-rootProcessInstanceId", description.rootProcessInstanceId())
-                .header("kogito-processId", description.processId())
-                .header("kogito-rootProcessId", description.rootProcessId())
-                .header("kogito-nodeInstanceId", description.nodeInstanceId())
+                .header(PROCESS_ID, description.processId())
+                .header(PROCESS_INSTANCE_ID, description.processInstanceId())
+                .header(ROOT_PROCESS_ID, description.rootProcessId())
+                .header(ROOT_PROCESS_INSTANCE_ID, description.rootProcessInstanceId())
+                .header(NODE_INSTANCE_ID, description.nodeInstanceId())
                 .build();
     }
 

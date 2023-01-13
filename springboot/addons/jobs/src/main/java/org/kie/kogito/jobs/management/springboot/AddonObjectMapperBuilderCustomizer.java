@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package org.kie.kogito.jobs.management.quarkus;
+package org.kie.kogito.jobs.management.springboot;
 
-import javax.enterprise.context.ApplicationScoped;
+import org.kie.kogito.jobs.service.api.event.serialization.SerializationUtils;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+@Configuration
+public class AddonObjectMapperBuilderCustomizer {
 
-import io.quarkus.jackson.ObjectMapperCustomizer;
-
-import static org.kie.kogito.jobs.service.api.event.serialization.SerializationUtils.registerDescriptors;
-
-@ApplicationScoped
-public class ObjectMapperConfig implements ObjectMapperCustomizer {
-    @Override
-    public void customize(ObjectMapper objectMapper) {
-        registerDescriptors(objectMapper);
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer customizer() {
+        return builder -> builder.postConfigurer(SerializationUtils::registerDescriptors);
     }
 }

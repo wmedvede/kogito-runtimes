@@ -23,7 +23,7 @@ import org.kie.kogito.jobs.ProcessInstanceJobDescription;
 import org.kie.kogito.jobs.api.URIBuilder;
 import org.kie.kogito.jobs.service.api.Job;
 
-import static org.kie.kogito.jobs.api.JobCallbackResourceDef.buildCallbackPatternJobV2;
+import static org.kie.kogito.jobs.api.JobCallbackResourceDef.buildCallbackPatternJob;
 import static org.kie.kogito.jobs.api.JobCallbackResourceDef.buildCallbackURI;
 
 public abstract class RestJobsService implements JobsService {
@@ -52,6 +52,6 @@ public abstract class RestJobsService implements JobsService {
     }
 
     public Job buildJob(ProcessInstanceJobDescription description, String callback) {
-        return buildCallbackPatternJobV2(description, callback);
+        return buildCallbackPatternJob(description, callback);
     }
 }

@@ -41,7 +41,7 @@ import io.smallrye.reactive.messaging.providers.locals.ContextAwareMessage;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 
-import static org.kie.kogito.jobs.api.JobCallbackResourceDef.buildCallbackPatternJobV2;
+import static org.kie.kogito.jobs.api.JobCallbackResourceDef.buildCallbackPatternJob;
 import static org.kie.kogito.jobs.api.JobCallbackResourceDef.buildCallbackURI;
 
 public abstract class AbstractReactiveMessagingJobsService implements JobsService {
@@ -74,7 +74,7 @@ public abstract class AbstractReactiveMessagingJobsService implements JobsServic
 
     @Override
     public String scheduleProcessInstanceJob(ProcessInstanceJobDescription description) {
-        Job job = buildCallbackPatternJobV2(description, buildCallbackURI(description, serviceUrl.toString()));
+        Job job = buildCallbackPatternJob(description, buildCallbackURI(description, serviceUrl.toString()));
         LOGGER.debug("scheduleProcessInstanceJob job: {}", job);
         CreateJobEvent event = CreateJobEvent.builder()
                 .source(serviceUrl)
