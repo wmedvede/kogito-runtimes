@@ -21,7 +21,27 @@ import org.kie.kogito.jobs.service.api.Retry;
 import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.kie.kogito.jobs.service.api.event.TestConstants.*;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.CORRELATION_ID;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.DATA_SCHEMA;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.ID;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_HEADER_1;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_HEADER_1_VALUE;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_METHOD;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_PAYLOAD;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_QUERY_PARAM_1;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_QUERY_PARAM_1_VALUE;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_QUERY_PARAM_2;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_QUERY_PARAM_2_VALUE;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RECIPIENT_URL;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RETRY_DELAY;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RETRY_DELAY_UNIT;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RETRY_DURATION_UNIT;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RETRY_MAX_DURATION;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.RETRY_MAX_RETRIES;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.SOURCE;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.SUBJECT;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.TIME;
+import static org.kie.kogito.jobs.service.api.event.TestConstants.buildJob;
 
 class CreateJobEventTest extends AbstractJobCloudEventTest<CreateJobEvent> {
 
@@ -58,10 +78,11 @@ class CreateJobEventTest extends AbstractJobCloudEventTest<CreateJobEvent> {
         assertThat(retry.getDurationUnit()).isEqualTo(RETRY_DURATION_UNIT);
 
         assertThat(job.getRecipient()).isInstanceOf(HttpRecipient.class);
-        HttpRecipient recipient = (HttpRecipient) job.getRecipient();
+        HttpRecipient<?> recipient = (HttpRecipient<?>) job.getRecipient();
         assertThat(recipient.getUrl()).isEqualTo(RECIPIENT_URL);
         assertThat(recipient.getMethod()).isEqualTo(RECIPIENT_METHOD);
-        assertThat(recipient.getPayload()).isEqualTo(RECIPIENT_PAYLOAD);
+        assertThat(recipient.getPayload()).isNotNull();
+        assertThat(recipient.getPayload().getData()).isEqualTo(RECIPIENT_PAYLOAD);
         assertThat(recipient.getHeaders())
                 .hasSize(1)
                 .containsEntry(RECIPIENT_HEADER_1, RECIPIENT_HEADER_1_VALUE);

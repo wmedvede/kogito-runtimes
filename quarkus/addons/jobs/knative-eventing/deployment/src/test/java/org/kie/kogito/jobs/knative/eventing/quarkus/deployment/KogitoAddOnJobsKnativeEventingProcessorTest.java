@@ -45,8 +45,6 @@ import org.kie.kogito.jobs.service.api.event.JobCloudEvent;
 import org.kie.kogito.jobs.service.api.event.serialization.SpecVersionDeserializer;
 import org.kie.kogito.jobs.service.api.event.serialization.SpecVersionSerializer;
 import org.kie.kogito.jobs.service.api.recipient.http.HttpRecipient;
-// import org.kie.kogito.jobs.service.api.recipient.kafka.KafkaRecipient;
-import org.kie.kogito.jobs.service.api.recipient.sink.SinkRecipient;
 import org.kie.kogito.jobs.service.api.schedule.cron.CronSchedule;
 import org.kie.kogito.jobs.service.api.schedule.timer.TimerSchedule;
 import org.kie.kogito.quarkus.extensions.spi.deployment.KogitoProcessContainerGeneratorBuildItem;
@@ -134,15 +132,13 @@ class KogitoAddOnJobsKnativeEventingProcessorTest {
     void eventsApiReflection() {
         ReflectiveClassBuildItem reflectiveClassBuildItem = new KogitoAddOnJobsKnativeEventingProcessor().eventsApiReflection();
         assertThat(reflectiveClassBuildItem.getClassNames())
-                .hasSize(14)
+                .hasSize(12)
                 .containsExactlyInAnyOrder(SpecVersionSerializer.class.getName(),
                         SpecVersionDeserializer.class.getName(),
                         Job.class.getName(),
                         JobLookupId.class.getName(),
                         Recipient.class.getName(),
                         HttpRecipient.class.getName(),
-                        //KafkaRecipient.class.getName(),
-                        SinkRecipient.class.getName(),
                         Schedule.class.getName(),
                         TimerSchedule.class.getName(),
                         CronSchedule.class.getName(),

@@ -286,7 +286,6 @@ public abstract class AbstractReactiveMessagingJobsServiceTest<T extends Abstrac
                 .id(TIMER_JOB_ID.encode())
                 .retry(null)
                 .schedule(TimerSchedule.builder()
-                        //TODO check this conversion
                         .startTime(EXPIRATION_TIME.get().toOffsetDateTime())
                         .repeatCount(EXPIRATION_TIME.repeatLimit())
                         .delay(EXPIRATION_TIME.repeatInterval())
@@ -294,11 +293,11 @@ public abstract class AbstractReactiveMessagingJobsServiceTest<T extends Abstrac
                         .build())
                 .recipient(HttpRecipient.builder().forStringPayload()
                         .url(CALLBACK_ENDPOINT)
-                        .header("kogito-processInstanceId", PROCESS_INSTANCE_ID)
-                        .header("kogito-rootProcessInstanceId", ROOT_PROCESS_INSTANCE_ID)
-                        .header("kogito-processId", PROCESS_ID)
-                        .header("kogito-rootProcessId", ROOT_PROCESS_ID)
-                        .header("kogito-nodeInstanceId", NODE_INSTANCE_ID)
+                        .header("processInstanceId", PROCESS_INSTANCE_ID)
+                        .header("rootProcessInstanceId", ROOT_PROCESS_INSTANCE_ID)
+                        .header("processId", PROCESS_ID)
+                        .header("rootProcessId", ROOT_PROCESS_ID)
+                        .header("nodeInstanceId", NODE_INSTANCE_ID)
                         .build())
                 .build();
 

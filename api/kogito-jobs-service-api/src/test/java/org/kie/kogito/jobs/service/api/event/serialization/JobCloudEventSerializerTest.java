@@ -99,9 +99,12 @@ class JobCloudEventSerializerTest {
         assertThat(recipientJsonNode).isNotNull();
         assertHasTotalFields(recipientJsonNode, 6);
         assertHasFieldWithValue(recipientJsonNode, "type", "http");
-        assertHasFieldWithValue(recipientJsonNode, "payload", Base64.getEncoder().encodeToString(RECIPIENT_PAYLOAD));
         assertHasFieldWithValue(recipientJsonNode, "url", RECIPIENT_URL);
         assertHasFieldWithValue(recipientJsonNode, "method", RECIPIENT_METHOD);
+
+        JsonNode payloadJsonNode = recipientJsonNode.get("payload");
+        assertHasFieldWithValue(payloadJsonNode, "type", "binary");
+        assertHasFieldWithValue(payloadJsonNode, "data", Base64.getEncoder().encodeToString(RECIPIENT_PAYLOAD));
 
         JsonNode headersJsonNode = recipientJsonNode.get("headers");
         assertThat(headersJsonNode).isNotNull();
