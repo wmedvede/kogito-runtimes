@@ -71,6 +71,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.kie.kogito</groupId>
+      <artifactId>kogito-test-utils</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.mvel</groupId>
       <artifactId>mvel2</artifactId>
       <scope>test</scope>

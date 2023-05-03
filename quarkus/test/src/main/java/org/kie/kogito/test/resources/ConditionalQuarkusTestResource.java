@@ -25,8 +25,6 @@ import javax.annotation.Resource;
 import org.kie.kogito.test.quarkus.QuarkusTestProperty;
 import org.testcontainers.containers.Container;
 
-import com.google.common.base.Strings;
-
 import io.quarkus.test.common.DevServicesContext;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
@@ -103,7 +101,7 @@ public abstract class ConditionalQuarkusTestResource<T extends TestResource> imp
                 if (quarkusTestProperty != null) {
                     String value = Optional.ofNullable(getProperties().get(quarkusTestProperty.name()))
                             .orElse(quarkusTestProperty.defaultValue());
-                    if (!Strings.isNullOrEmpty(value)) {
+                    if (value != null && !value.isEmpty()) {
                         setFieldValue(f, testInstance, value);
                     }
                 } else if (f.isAnnotationPresent(Resource.class) && f.getType().isInstance(this)) {
