@@ -56,6 +56,12 @@ public class ChannelMappingStrategy {
         Map<String, Collection<String>> inTriggers = new HashMap<>();
         Map<String, Collection<String>> outTriggers = new HashMap<>();
 
+        //System.out.println("XXXXXXXXXXXXXXXXXXXXXX current properties ");
+        config.getPropertyNames().forEach(property -> {
+            //System.out.println(property + "=" + config.getOptionalValue(property, String.class).orElse("NOT SET"));
+        });
+        //System.out.println("XXXXXXXXXXXXXXXXXXXXXX current end");
+
         for (String property : config.getPropertyNames()) {
             if (property.startsWith(INCOMING_TRIGGER)) {
                 addTrigger(INCOMING_TRIGGER, property, inTriggers);
@@ -68,9 +74,16 @@ public class ChannelMappingStrategy {
         final String defaultIncomingChannel = config.getOptionalValue(INCOMING_DEFAULT_CHANNEL, String.class).orElse(KogitoEventStreams.INCOMING);
         final String defaultOutgoingChannel = config.getOptionalValue(OUTGOING_DEFAULT_CHANNEL, String.class).orElse(KogitoEventStreams.OUTGOING);
         for (String property : config.getPropertyNames()) {
+            if (property.startsWith("kogito")) {
+                System.out.println(property + "=" + config.getOptionalValue(property, String.class).orElse("NOT SET"));
+            }
             if (property.startsWith(INCOMING_PREFIX) && property.endsWith(".connector")) {
+                System.out.println(property + "=" + config.getOptionalValue(property, String.class).orElse("NOT SET"));
+
                 result.add(getChannelInfo(property, INCOMING_PREFIX, true, defaultIncomingChannel, inTriggers));
             } else if (property.startsWith(OUTGOING_PREFIX) && property.endsWith(".connector")) {
+                System.out.println(property + "=" + config.getOptionalValue(property, String.class).orElse("NOT SET"));
+
                 result.add(getChannelInfo(property, OUTGOING_PREFIX, false, defaultOutgoingChannel, outTriggers));
             }
         }

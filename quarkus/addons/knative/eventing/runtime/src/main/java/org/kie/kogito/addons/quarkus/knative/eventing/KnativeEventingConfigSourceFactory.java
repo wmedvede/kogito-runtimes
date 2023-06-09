@@ -65,9 +65,9 @@ public final class KnativeEventingConfigSourceFactory implements ConfigSourceFac
 
         addOutgoingConnector(configuration, KogitoEventStreams.OUTGOING);
 
-        if (!skipDefaultIncomingStream(context)) {
-            addIncomingConnector(configuration);
-        }
+        //        if (!skipDefaultIncomingStream(context)) {
+        //            addIncomingConnector(configuration);
+        //        }
 
         if (includeProcessEvents(context)) {
             addOutgoingConnector(configuration, PROCESS_INSTANCES_EVENTS);

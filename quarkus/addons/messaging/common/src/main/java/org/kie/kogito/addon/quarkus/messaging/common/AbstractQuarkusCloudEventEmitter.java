@@ -45,7 +45,7 @@ public abstract class AbstractQuarkusCloudEventEmitter<M> implements EventEmitte
     public CompletionStage<Void> emit(DataEvent<?> dataEvent) {
         logger.debug("publishing event {}", dataEvent);
         try {
-            Message<M> message = messageDecorator.decorate(Message.of(getPayload(dataEvent)));
+            Message<M> message = messageDecorator.decorate(Message.of(getPayload(dataEvent)))..;
             emit(message);
             return message.getAck().get();
         } catch (IOException e) {
