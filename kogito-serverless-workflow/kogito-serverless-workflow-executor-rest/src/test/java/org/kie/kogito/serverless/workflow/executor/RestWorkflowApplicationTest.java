@@ -57,8 +57,9 @@ class RestWorkflowApplicationTest {
         final String START_STATE = "start";
         final String FUNCTION_NAME = "function";
         try (StaticWorkflowApplication application = StaticWorkflowApplication.create()) {
-            Workflow workflow = new Workflow("HelloRest", "Hello Rest", "1.0", Arrays.asList(
+            Workflow workflow = new Workflow("Hello Rest", "1.0", Arrays.asList(
                     new OperationState().withName(START_STATE).withType(Type.OPERATION).withActions(Arrays.asList(new Action().withFunctionRef(new FunctionRef(FUNCTION_NAME)))).withEnd(new End())))
+                            .withId("HelloRest")
                             .withStart(new Start().withStateName(START_STATE))
                             .withFunctions(new Functions(Arrays.asList(new FunctionDefinition(FUNCTION_NAME).withOperation("rest:get:http://localhost:" + wm.getPort() + "/name")
                                     .withType(FunctionDefinition.Type.CUSTOM))));

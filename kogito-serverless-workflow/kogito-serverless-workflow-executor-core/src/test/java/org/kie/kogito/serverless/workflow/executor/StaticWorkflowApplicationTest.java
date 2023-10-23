@@ -98,8 +98,9 @@ class StaticWorkflowApplicationTest {
     }
 
     private Workflow helloWorldDef() {
-        return new Workflow("HelloWorld", "Hello World", "1.0", Arrays.asList(
+        return new Workflow("Hello World", "1.0", Arrays.asList(
                 new InjectState(START_STATE, Type.INJECT).withData(new TextNode(GREETING_STRING)).withEnd(new End())))
+                        .withId("HelloWorld")
                         .withStart(new Start().withStateName(START_STATE));
     }
 }
